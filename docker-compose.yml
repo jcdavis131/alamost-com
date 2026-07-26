@@ -1,0 +1,28 @@
+# Postgres for local development.
+#
+#   docker compose up -d
+#
+# Port 5433 rather than 5432 so this never collides with a Postgres you
+# already have running. Data lives in a named volume and survives restarts;
+# `docker compose down -v` wipes it if you want a clean slate.
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: alamost-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: shop
+      POSTGRES_PASSWORD: shop
+      POSTGRES_DB: shop
+    ports:
+      - "5433:5432"
+    volumes:
+      - alamost-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shop -d shop"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  alamost-pgdata:
