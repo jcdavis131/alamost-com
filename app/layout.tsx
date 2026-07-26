@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "alamost.com — Lina's Card Shop",
-  description: "Daily MTNN cards • equities, hoops, gridiron — static shop, Canvas 2D export, free-tier.",
+  title: "Lina's Card Shop",
+  description:
+    "Lina photographs the cards she is selling and they appear in her shop.",
   metadataBase: new URL("https://alamost.com"),
   openGraph: {
-    title: "alamost.com — Lina's Card Shop",
-    description: "Curated daily cards from MTNN models. Shop, preview, export PNG.",
+    title: "Lina's Card Shop",
+    description: "Lina photographs the cards she is selling and they appear in her shop.",
     type: "website",
     url: "https://alamost.com",
   },

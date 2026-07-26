@@ -1,99 +1,112 @@
 "use client";
-import { useMemo, useRef, useState } from "react";
-import { cardsManifest, type CardLeague } from "../lib/cards";
-import { okabeIto } from "../lib/okabe-ito";
-import CardCanvas, { exportPng } from "../components/card-canvas";
-import BottomTabs from "../components/bottom-tabs";
+import { useEffect, useState } from "react";
+import { loadCards, saveCards, type ShopCard } from "../lib/shop";
+import { downloadShopCard } from "../components/card-canvas";
+import AddCard from "../components/add-card";
 import Footer from "../components/footer";
 
-type Filter = "all" | CardLeague;
-const filterOpts: { id: Filter; label: string; swatch: string; icon: string }[] = [
-  { id: "all", label: "All", swatch: "#111", icon: "◫" },
-  { id: "equities", label: "Equities", swatch: okabeIto.green, icon: "▲" },
-  { id: "hoops", label: "Hoops", swatch: okabeIto.blue, icon: "◐" },
-  { id: "gridiron", label: "Gridiron", swatch: okabeIto.orange, icon: "■" },
-];
+export default function Page() {
+  const [cards, setCards] = useState<ShopCard[]>([]);
+  const [ready, setReady] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
-function getAccent(c: string){
-  const map: Record<string,string> = { blue:"#0072B2", orange:"#E69F00", green:"#009E73", vermillion:"#D55E00", sky:"#56B4E9", purple:"#CC79A7", yellow:"#F0E442", black:"#000" };
-  return map[c] || "#0072B2";
-}
+  // Cards live in localStorage, so they can only be read once mounted.
+  useEffect(() => {
+    setCards(loadCards());
+    setReady(true);
+  }, []);
 
-export default function Page(){
-  const [filter, setFilter] = useState<Filter>("all");
-  const [q, setQ] = useState("");
-  const canvasMap = useRef(new Map<string, HTMLCanvasElement>());
+  function commit(next: ShopCard[]) {
+    setCards(next);
+    const res = saveCards(next);
+    if (!res.ok) {
+      setNotice(
+        res.reason === "full"
+          ? "The shop is full on this device. Remove a card to add another."
+          : "That did not save. Your browser may be blocking storage.",
+      );
+    } else {
+      setNotice(null);
+    }
+  }
 
-  const filtered = useMemo(()=>{
-    const low = q.toLowerCase();
-    return cardsManifest.filter(c=>{
-      if (filter !== "all" && c.league !== filter) return false;
-      if (q && (`${c.title} ${c.subtitle} ${c.drivers.join(" ")}`.toLowerCase().indexOf(low) === -1)) return false;
-      return true;
-    });
-  }, [filter, q]);
+  const add = (card: ShopCard) => commit([card, ...cards]);
+  const remove = (id: string) => commit(cards.filter((c) => c.id !== id));
 
   return (
-    <div className="min-h-screen bg-[#FDFCF8] text-[#111110] antialiased" style={{fontSize:"18px", lineHeight:"1.65"}}>
-      <header className="sticky top-0 z-20 border-b border-black/10 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-[1040px] items-center justify-between gap-4 px-5 py-3">
-          <div className="flex items-center gap-3">
-            <div className="grid h-[32px] w-[32px] place-items-center rounded-[7px] bg-black text-[14px] font-bold text-white">A</div>
-            <div className="leading-tight">
-              <div className="text-[15px] font-bold">alamost.com</div>
-              <div className="text-[11px] text-black/60">Lina card shop - daily MTNN to PNG</div>
-            </div>
-          </div>
-          <span className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-semibold"><span className="mr-1 inline-block h-[6px] w-[6px] rounded-full bg-green-600" /> live free-tier</span>
+    <div className="min-h-screen">
+      <header className="hairline border-x-0 border-t-0 bg-[var(--paper-raised)]">
+        <div className="mx-auto flex max-w-[1080px] items-baseline justify-between gap-4 px-6 py-7">
+          <h1 className="display text-[30px] leading-none sm:text-[38px]">Lina&apos;s Card Shop</h1>
+          <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--ink-muted)]">
+            {ready && cards.length > 0 ? `${cards.length} for sale` : "Open"}
+          </p>
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1040px] px-5 pb-[112px] pt-6">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="text-[28px] font-extrabold tracking-tight">Daily Cards - shop grid</h1>
-            <p className="mt-1 max-w-[52ch] text-[15px] text-black/60">Static manifest to client Canvas 2D to PNG download. No server, no paid APIs.</p>
-          </div>
-          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search ticker, matchup, driver" className="h-[40px] w-[240px] rounded-[10px] border border-black/10 bg-white px-3 text-[13.5px] outline-none" />
-        </div>
+      <main className="mx-auto max-w-[1080px] px-6 pb-20 pt-8">
+        <AddCard onAdd={add} />
 
-        <div className="mb-6 flex flex-wrap gap-2">
-          {filterOpts.map(o=>{
-            const active = filter===o.id;
-            const count = o.id==="all" ? cardsManifest.length : cardsManifest.filter(c=>c.league===o.id).length;
-            return (
-              <button key={o.id} onClick={()=>setFilter(o.id)} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12.5px] font-semibold ${active ? "border-black bg-black text-white" : "border-black/10 bg-white text-black/70"}`}>
-                <span className="grid h-[16px] w-[16px] place-items-center rounded text-[11px]" style={{background: active ? o.swatch : "#eee"}}>{o.icon}</span>{o.label}<span className="ml-1 rounded-full bg-black/10 px-1 text-[10px]">{count}</span>
-              </button>
-            );
-          })}
-        </div>
+        {notice && (
+          <p role="alert" className="mt-5 text-[15px] font-medium text-[var(--accent)]">
+            {notice}
+          </p>
+        )}
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map(card=>{
-            return (
-              <article key={card.id} className="flex flex-col rounded-[14px] border border-black/10 bg-white p-3">
-                <div className="rounded-[10px] bg-[#F7F7F5] p-2"><CardCanvas card={card} expose={(cv)=>{ canvasMap.current.set(card.id, cv); }} /></div>
-                <div className="px-1.5 pt-3">
-                  <div className="flex items-center gap-1.5"><span className="inline-block h-[9px] w-[9px] rounded" style={{background:getAccent(card.accent)}} /><h2 className="truncate text-[14.5px] font-bold">{card.title}</h2></div>
-                  <p className="mt-0.5 text-[11.5px] text-black/55">{card.subtitle} - {card.asof.slice(0,10)} - {card.model}</p>
-                  <ul className="mt-2.5 space-y-1">{card.drivers.map((d,i)=>(<li key={i} className="text-[11.5px] text-black/70">- {d}</li>))}</ul>
-                  <div className="mt-3 flex gap-2">
-                    <button onClick={()=>{ const cv = canvasMap.current.get(card.id); if (cv) exportPng(cv, `card-${card.id}.png`); }} className="flex-1 rounded-[9px] bg-black px-3 py-2 text-[12.5px] font-semibold text-white">Download PNG</button>
-                  </div>
+        <h2 className="display mt-14 text-[26px] sm:text-[30px]">For sale</h2>
+
+        {ready && cards.length === 0 && (
+          <p className="hairline mt-5 rounded-2xl px-6 py-14 text-center text-[17px] text-[var(--ink-muted)]">
+            No cards yet. Take a photo above to put your first one in the shop.
+          </p>
+        )}
+
+        <ul className="mt-6 grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-3">
+          {cards.map((card) => (
+            <li key={card.id}>
+              <article>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={card.photo}
+                  alt={card.name}
+                  className="hairline w-full rounded-xl bg-white object-cover"
+                  style={{ aspectRatio: "4 / 5" }}
+                />
+                <div className="mt-3 flex items-baseline justify-between gap-3">
+                  <h3 className="display min-w-0 break-words text-[21px] leading-snug">
+                    {card.name}
+                  </h3>
+                  {card.price && (
+                    <p className="shrink-0 text-[16px] font-semibold text-[var(--accent)]">
+                      {card.price}
+                    </p>
+                  )}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => downloadShopCard(card)}
+                    className="hairline rounded-full bg-[var(--paper-raised)] px-5 text-[15px] font-semibold"
+                    style={{ minHeight: 48 }}
+                  >
+                    Save picture
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => remove(card.id)}
+                    className="rounded-full px-5 text-[15px] font-semibold text-[var(--ink-muted)] hover:text-[var(--accent)]"
+                    style={{ minHeight: 48 }}
+                  >
+                    Remove
+                  </button>
                 </div>
               </article>
-            );
-          })}
-        </div>
-
-        {filtered.length===0 && <div className="mt-16 rounded border border-dashed px-6 py-14 text-center text-[14px] text-black/60">No cards match - try All or clear search</div>}
-
-        <section className="mt-14 rounded bg-white p-5 text-[13.5px] text-black/70 shadow-sm"><h3 className="text-[13px] font-bold uppercase text-black/60">About</h3><p className="mt-1">Each card cites asof + model_id. Client-only Canvas 2D export - no Puppeteer, no Sharp, free-tier static. Deploy: Git push to Vercel to alamost.com.</p></section>
+            </li>
+          ))}
+        </ul>
       </main>
 
       <Footer />
-      <BottomTabs />
     </div>
   );
 }
