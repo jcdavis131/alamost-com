@@ -4,11 +4,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Lina's Card Shop",
   description:
-    "Printable picture cards for little kids — animals, numbers and shapes. Pick a card, print it, colour it in.",
+    "Lina photographs the cards she is selling and they appear in her shop.",
   metadataBase: new URL("https://alamost.com"),
   openGraph: {
     title: "Lina's Card Shop",
-    description: "Printable picture cards for little kids — animals, numbers and shapes.",
+    description: "Lina photographs the cards she is selling and they appear in her shop.",
     type: "website",
     url: "https://alamost.com",
   },

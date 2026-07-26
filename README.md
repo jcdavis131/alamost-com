@@ -1,26 +1,32 @@
 # alamost.com — Lina's Card Shop
 
-Printable picture cards for a small kid. Pick a card, download it as a PNG, print it, colour it in.
+Lina photographs the cards she is selling and they show up in her shop, each with a name and a price.
 
-Three sets, twenty cards:
-
-- **Animals** — big picture, the animal's name, and its first letter in a badge for letter practice.
-- **Numbers** — the art repeats, so 1–5 can be counted out loud off the card.
-- **Shapes** — circle, square, triangle, star, heart.
+Take a photo → name it → price it → it's for sale. Any card can also be saved as a picture (photo,
+name, price, shop mark) to send to someone.
 
 ## How it works
 
-Cards are drawn client-side with Canvas 2D and saved via `toDataURL`, so there is no server, no
-image hosting, and nothing to pay for. The art is emoji, which means no asset pipeline and the
-whole thing works offline once loaded.
+Static export, no backend, free tier. That shapes two things:
 
-Cards render on white at 1080×1350 so they print without draining a colour cartridge, and leave
-room at the bottom to colour in.
+**Photos are stored in the browser.** Cards live in `localStorage` on the device that added them.
+They survive a reload and closing the tab, but they do not sync between her tablet and a phone, and
+nobody else sees them by visiting the site. A real multi-device shop would need a backend and
+somewhere to put the images.
 
-Card content lives in one place — `lib/cards.ts`. Add an entry and it shows up in the shop.
+**Photos are downscaled before saving.** A straight phone photo as a data URL would exhaust the
+~5MB localStorage quota in about two shots, so `lib/shop.ts` cover-crops each photo to 864×1080 and
+encodes it as JPEG at 0.82. That lands around 20 cards per device. When the quota is hit the shop
+says so instead of silently dropping a card.
 
-Accent colours come from the Okabe-Ito palette, which stays distinguishable for colourblind
-readers. Each hue is paired with an ink colour so large text keeps at least 3:1 contrast.
+Card capture uses `<input type="file" accept="image/*" capture="environment">`, which opens the back
+camera directly on a phone and falls back to the photo library elsewhere.
+
+## Design
+
+Warm paper, near-black ink, one terracotta accent, and a serif only for the wordmark and card names.
+Hairline rules rather than heavy borders. The accent is 5.4:1 on paper and white is 5.4:1 on the
+accent, so it is safe as both text and a solid button. Controls are 48–56px tall — she is five.
 
 ## Develop
 

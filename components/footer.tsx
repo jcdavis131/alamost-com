@@ -1,12 +1,12 @@
 export default function Footer() {
   return (
-    <footer className="border-t-4 border-[#EDE9DE] bg-white">
-      <div className="mx-auto max-w-[1100px] px-5 py-7 text-center">
-        <p className="text-[17px] font-bold text-[#4A4A44]">
-          <span aria-hidden="true">💜</span> Made for Lina
+    <footer className="hairline border-x-0 border-b-0 bg-[var(--paper-raised)]">
+      <div className="mx-auto flex max-w-[1080px] flex-wrap items-baseline justify-between gap-3 px-6 py-7">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--ink-muted)]">
+          Lina&apos;s Card Shop
         </p>
-        <p className="mt-1 text-[15px] text-[#6B6A63]">
-          Cards save as pictures you can print at home.
+        <p className="text-[14px] text-[var(--ink-muted)]">
+          Cards are kept on this device.
         </p>
       </div>
     </footer>

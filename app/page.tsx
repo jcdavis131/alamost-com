@@ -1,101 +1,108 @@
 "use client";
-import { useMemo, useState } from "react";
-import { accents, cardsManifest, kinds, type CardKind } from "../lib/cards";
-import CardCanvas, { downloadCard } from "../components/card-canvas";
+import { useEffect, useState } from "react";
+import { loadCards, saveCards, type ShopCard } from "../lib/shop";
+import { downloadShopCard } from "../components/card-canvas";
+import AddCard from "../components/add-card";
 import Footer from "../components/footer";
 
-type Filter = CardKind | "all";
-
 export default function Page() {
-  const [filter, setFilter] = useState<Filter>("all");
-  const [got, setGot] = useState<string | null>(null);
+  const [cards, setCards] = useState<ShopCard[]>([]);
+  const [ready, setReady] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
-  const shown = useMemo(
-    () => (filter === "all" ? cardsManifest : cardsManifest.filter((c) => c.kind === filter)),
-    [filter],
-  );
+  // Cards live in localStorage, so they can only be read once mounted.
+  useEffect(() => {
+    setCards(loadCards());
+    setReady(true);
+  }, []);
 
-  function take(id: string) {
-    const card = cardsManifest.find((c) => c.id === id);
-    if (!card) return;
-    if (downloadCard(card)) {
-      setGot(id);
-      window.setTimeout(() => setGot((g) => (g === id ? null : g)), 2500);
+  function commit(next: ShopCard[]) {
+    setCards(next);
+    const res = saveCards(next);
+    if (!res.ok) {
+      setNotice(
+        res.reason === "full"
+          ? "The shop is full on this device. Remove a card to add another."
+          : "That did not save. Your browser may be blocking storage.",
+      );
+    } else {
+      setNotice(null);
     }
   }
 
+  const add = (card: ShopCard) => commit([card, ...cards]);
+  const remove = (id: string) => commit(cards.filter((c) => c.id !== id));
+
   return (
-    <div className="min-h-screen bg-[#FFFDF7]">
-      <header className="border-b-4 border-[#0072B2] bg-white">
-        <div className="mx-auto max-w-[1100px] px-5 py-7 text-center">
-          <h1 className="text-[40px] font-extrabold leading-tight tracking-tight text-[#111110] sm:text-[56px]">
-            <span aria-hidden="true">🌈</span> Lina&apos;s Card Shop
-          </h1>
-          <p className="mx-auto mt-2 max-w-[28ch] text-[19px] font-semibold text-[#4A4A44] sm:text-[22px]">
-            Pick a card. Print it. Colour it in.
+    <div className="min-h-screen">
+      <header className="hairline border-x-0 border-t-0 bg-[var(--paper-raised)]">
+        <div className="mx-auto flex max-w-[1080px] items-baseline justify-between gap-4 px-6 py-7">
+          <h1 className="display text-[30px] leading-none sm:text-[38px]">Lina&apos;s Card Shop</h1>
+          <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--ink-muted)]">
+            {ready && cards.length > 0 ? `${cards.length} for sale` : "Open"}
           </p>
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1100px] px-5 pb-16 pt-7">
-        <h2 className="sr-only">Choose what to look at</h2>
-        <div className="mb-8 flex flex-wrap justify-center gap-3">
-          {kinds.map((k) => {
-            const on = filter === k.id;
-            return (
-              <button
-                key={k.id}
-                type="button"
-                onClick={() => setFilter(k.id)}
-                aria-pressed={on}
-                className={`inline-flex items-center gap-2.5 rounded-full border-4 px-6 text-[21px] font-extrabold transition-colors ${
-                  on
-                    ? "border-[#0072B2] bg-[#0072B2] text-white"
-                    : "border-[#D9D6CC] bg-white text-[#111110] hover:border-[#0072B2]"
-                }`}
-                style={{ minHeight: 64 }}
-              >
-                <span aria-hidden="true" className="text-[26px]">
-                  {k.art}
-                </span>
-                {k.label}
-              </button>
-            );
-          })}
-        </div>
+      <main className="mx-auto max-w-[1080px] px-6 pb-20 pt-8">
+        <AddCard onAdd={add} />
 
-        <ul className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
-          {shown.map((card) => {
-            const accent = accents[card.accent];
-            const mine = got === card.id;
-            return (
-              <li
-                key={card.id}
-                className="flex flex-col rounded-[20px] border-4 border-[#EDE9DE] bg-white p-4"
-              >
-                <CardCanvas card={card} />
-                <button
-                  type="button"
-                  onClick={() => take(card.id)}
-                  className="mt-4 w-full rounded-[14px] text-[22px] font-extrabold text-white transition-transform active:scale-[0.98]"
-                  style={{ minHeight: 68, background: mine ? "#009E73" : accent.bg, color: mine ? "#FFFFFF" : accent.ink }}
-                >
-                  {mine ? (
-                    <>
-                      <span aria-hidden="true">🎉</span> Got it!
-                    </>
-                  ) : (
-                    <>
-                      <span aria-hidden="true">⬇</span> Get {card.name}
-                    </>
+        {notice && (
+          <p role="alert" className="mt-5 text-[15px] font-medium text-[var(--accent)]">
+            {notice}
+          </p>
+        )}
+
+        <h2 className="display mt-14 text-[26px] sm:text-[30px]">For sale</h2>
+
+        {ready && cards.length === 0 && (
+          <p className="hairline mt-5 rounded-2xl px-6 py-14 text-center text-[17px] text-[var(--ink-muted)]">
+            No cards yet. Take a photo above to put your first one in the shop.
+          </p>
+        )}
+
+        <ul className="mt-6 grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-3">
+          {cards.map((card) => (
+            <li key={card.id}>
+              <article>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={card.photo}
+                  alt={card.name}
+                  className="hairline w-full rounded-xl bg-white object-cover"
+                  style={{ aspectRatio: "4 / 5" }}
+                />
+                <div className="mt-3 flex items-baseline justify-between gap-3">
+                  <h3 className="display min-w-0 break-words text-[21px] leading-snug">
+                    {card.name}
+                  </h3>
+                  {card.price && (
+                    <p className="shrink-0 text-[16px] font-semibold text-[var(--accent)]">
+                      {card.price}
+                    </p>
                   )}
-                </button>
-                <p role="status" className="sr-only">
-                  {mine ? `${card.name} card saved.` : ""}
-                </p>
-              </li>
-            );
-          })}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => downloadShopCard(card)}
+                    className="hairline rounded-full bg-[var(--paper-raised)] px-5 text-[15px] font-semibold"
+                    style={{ minHeight: 48 }}
+                  >
+                    Save picture
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => remove(card.id)}
+                    className="rounded-full px-5 text-[15px] font-semibold text-[var(--ink-muted)] hover:text-[var(--accent)]"
+                    style={{ minHeight: 48 }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </article>
+            </li>
+          ))}
         </ul>
       </main>
 

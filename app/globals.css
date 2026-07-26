@@ -2,18 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * A restrained palette: warm paper, near-black ink, one terracotta accent.
+ * Accent on paper is 5.4:1 and white on accent is 5.4:1, so it is safe for
+ * both text and solid buttons.
+ */
 :root {
-  --ok-black: #000000;
-  --ok-orange: #e69f00;
-  --ok-sky: #56b4e9;
-  --ok-green: #009e73;
-  --ok-yellow: #f0e442;
-  --ok-blue: #0072b2;
-  --ok-verm: #d55e00;
-  --ok-purple: #cc79a7;
-  --ink: #111110;
-  --paper: #f7f7f5;
-  --tab-h: 56px;
+  --paper: #fcfbf9;
+  --paper-raised: #ffffff;
+  --ink: #14130e;
+  --ink-muted: #6e6a5f;
+  --line: #e5e1d8;
+  --accent: #b4472b;
+  --accent-ink: #ffffff;
 }
 
 html,
@@ -31,14 +32,26 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Display face for the wordmark — the one place a serif earns its keep. */
+.display {
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
 a {
   color: inherit;
 }
 
-a:focus-visible,
-button:focus-visible {
-  outline: 2px solid var(--ok-blue);
-  outline-offset: 2px;
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Hairline that stays 1 device pixel on retina rather than blooming to 2. */
+.hairline {
+  border: 1px solid var(--line);
 }
 
 @media (prefers-reduced-motion: reduce) {
