@@ -1,10 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "export",
   reactStrictMode: true,
-  images: { unoptimized: true },
+  // Card photos are served from Vercel Blob.
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com" }],
+  },
   trailingSlash: false,
-  // free-tier static only — no server APIs, Canvas 2D client export
 };
 
 module.exports = nextConfig;

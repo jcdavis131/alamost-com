@@ -1,49 +1,72 @@
 # alamost.com — Lina's Card Shop
 
-Lina photographs the cards she is selling and they show up in her shop, each with a name and a price.
+A real shop. Lina photographs the cards she is selling, names and prices them, and they appear
+publicly at alamost.com for anyone to browse.
 
-Take a photo → name it → price it → it's for sale. Any card can also be saved as a picture (photo,
-name, price, shop mark) to send to someone.
+## Roles
 
-## How it works
+| Role | Can do |
+|---|---|
+| **Owner** | Everything, plus create and manage people |
+| **Shopkeeper** (staff) | Add cards, mark sold, delete |
+| **Buyer** | Browse, and keep a saved login |
 
-Static export, no backend, free tier. That shapes two things:
+Buyers self-register at `/join`. Shopkeepers and owners are created by an owner from `/manage` —
+self-registration always produces a buyer, so it cannot be used to grant privilege.
 
-**Photos are stored in the browser.** Cards live in `localStorage` on the device that added them.
-They survive a reload and closing the tab, but they do not sync between her tablet and a phone, and
-nobody else sees them by visiting the site. A real multi-device shop would need a backend and
-somewhere to put the images.
+The first owner is seeded from environment variables the first time the app runs. No credentials
+are stored in this repo.
 
-**Photos are downscaled before saving.** A straight phone photo as a data URL would exhaust the
-~5MB localStorage quota in about two shots, so `lib/shop.ts` cover-crops each photo to 864×1080 and
-encodes it as JPEG at 0.82. That lands around 20 cards per device. When the quota is hit the shop
-says so instead of silently dropping a card.
+## What you must provision
 
-Card capture uses `<input type="file" accept="image/*" capture="environment">`, which opens the back
-camera directly on a phone and falls back to the photo library elsewhere.
+The app needs two stores and four environment variables. Until they exist the site shows a
+"being set up" page instead of crashing.
 
-## Design
+1. **Postgres** — any provider. Use the *pooled* connection string; a direct one will exhaust
+   connections under serverless load.
+2. **Blob storage** — Vercel Blob, for card photos.
 
-Warm paper, near-black ink, one terracotta accent, and a serif only for the wordmark and card names.
-Hairline rules rather than heavy borders. The accent is 5.4:1 on paper and white is 5.4:1 on the
-accent, so it is safe as both text and a solid button. Controls are 48–56px tall — she is five.
+```
+DATABASE_URL=postgres://…        # pooled connection string
+BLOB_READ_WRITE_TOKEN=…          # from the Blob store
+OWNER_EMAIL=you@example.com      # seeds the first owner on first run
+OWNER_PASSWORD=…                 # use a real password; change it after first sign-in
+OWNER_NAME=Cam                   # optional, defaults to "Owner"
+```
+
+There is no migration step. The schema is created on first use and every statement is idempotent,
+so deploying is just a git push.
+
+> **Vercel project setting:** the project's *Output Directory* must be cleared (empty / auto).
+> It is currently `out`, left over from when this was a static export. With it set, the Next.js
+> builder fails looking for `routes-manifest.json` and no server code can deploy.
+
+## Security notes
+
+- Passwords are hashed with scrypt (N=32768, r=8, p=1) and a per-user random salt. `maxmem` is
+  raised explicitly — the default is exactly at the limit for these parameters and throws.
+- Sessions are random 256-bit tokens. Only their SHA-256 hash is stored, so a database leak does
+  not hand over live sessions. Cookies are `httpOnly`, `Secure` in production, and `SameSite=Lax`.
+- Sign-in returns the same message for a wrong password and an unknown email, so it cannot be used
+  to discover which addresses have accounts.
+- Every privileged action re-checks the role server-side. Hiding a button is not the control.
+- Card photos are public and permanently fetchable once uploaded. Photograph cards on a plain
+  surface — anything else in frame is public too.
 
 ## Develop
 
+Requires a local Postgres. Without `BLOB_READ_WRITE_TOKEN`, photos are written to
+`public/uploads` so the whole flow works offline; that fallback refuses to run in production,
+where serverless filesystems are ephemeral.
+
 ```bash
 npm install
-npm run dev     # http://localhost:3000
-npm run build   # static export into out/
+cp .env.example .env.local     # then fill it in
+npm run dev
 ```
 
 ## Deploy
 
 Pushes to `main` deploy to alamost.com via Vercel.
 
-`vercel.json` sets `"framework": null` on purpose. The Vercel project has an Output Directory of
-`out`, which conflicts with the Next.js framework preset (that preset expects `.next` and the build
-fails looking for `routes-manifest.json`). With no framework preset, Vercel serves the static export
-in `out/` directly. If you ever want the real Next.js builder, clear the Output Directory setting in
-the Vercel project **and** drop `"framework": null` — they have to change together.
-
-Built solo • free-tier.
+Built solo.

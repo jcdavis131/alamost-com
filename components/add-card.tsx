@@ -1,52 +1,70 @@
 "use client";
 import { useRef, useState } from "react";
-import { fileToPhoto, newId, type ShopCard } from "../lib/shop";
+import { useFormState, useFormStatus } from "react-dom";
+import { preparePhoto } from "../lib/photo";
+import type { ActionState } from "../lib/action-state";
 
-type Props = { onAdd: (card: ShopCard) => void };
+function Submit({ hasPhoto }: { hasPhoto: boolean }) {
+  const { pending } = useFormStatus();
+  const enabled = hasPhoto && !pending;
+  return (
+    <button
+      type="submit"
+      disabled={!enabled}
+      className={`rounded-full px-7 text-[18px] font-semibold transition-colors ${
+        enabled
+          ? "bg-[var(--accent)] text-[var(--accent-ink)]"
+          : "hairline cursor-not-allowed bg-[var(--paper)] text-[var(--ink-muted)]"
+      }`}
+      style={{ minHeight: 56 }}
+    >
+      {pending ? "Adding…" : "Put it in the shop"}
+    </button>
+  );
+}
 
-export default function AddCard({ onAdd }: Props) {
+export default function AddCard({
+  action,
+}: {
+  action: (prev: ActionState, form: FormData) => Promise<ActionState>;
+}) {
+  const [state, formAction] = useFormState(action, {});
   const fileRef = useRef<HTMLInputElement>(null);
-  const [photo, setPhoto] = useState<string | null>(null);
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
+  const [preview, setPreview] = useState<string | null>(null);
+  const [blob, setBlob] = useState<Blob | null>(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   async function pick(file: File | undefined) {
     if (!file) return;
     setBusy(true);
-    setError(null);
+    setLocalError(null);
     try {
-      setPhoto(await fileToPhoto(file));
+      const prepared = await preparePhoto(file);
+      setBlob(prepared.blob);
+      setPreview(prepared.previewUrl);
     } catch {
-      setError("That photo would not open. Try taking it again.");
+      setLocalError("That photo would not open. Try taking it again.");
     } finally {
       setBusy(false);
     }
   }
 
-  function reset() {
-    setPhoto(null);
-    setName("");
-    setPrice("");
-    setError(null);
+  // The <input type=file> holds the original multi-megabyte photo. Swap in the
+  // downscaled blob so that is what gets uploaded.
+  function submit(form: FormData) {
+    if (blob) form.set("photo", blob, "card.jpg");
+    formAction(form);
+    setPreview(null);
+    setBlob(null);
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  function add() {
-    if (!photo) return;
-    onAdd({
-      id: newId(),
-      name: name.trim() || "My card",
-      price: price.trim(),
-      photo,
-      createdAt: Date.now(),
-    });
-    reset();
-  }
+  const error = localError ?? state.error;
 
   return (
-    <section
+    <form
+      action={submit}
       className="hairline rounded-2xl bg-[var(--paper-raised)] p-5 sm:p-7"
       aria-labelledby="add-heading"
     >
@@ -61,6 +79,7 @@ export default function AddCard({ onAdd }: Props) {
       <input
         ref={fileRef}
         type="file"
+        name="photo"
         accept="image/*"
         capture="environment"
         className="sr-only"
@@ -69,10 +88,10 @@ export default function AddCard({ onAdd }: Props) {
 
       <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-start">
         <div className="sm:w-[220px] sm:shrink-0">
-          {photo ? (
+          {preview ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={photo}
+              src={preview}
               alt="The card you just photographed"
               className="hairline w-full rounded-xl object-cover"
               style={{ aspectRatio: "4 / 5" }}
@@ -108,8 +127,7 @@ export default function AddCard({ onAdd }: Props) {
           <label className="block text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--ink-muted)]">
             Name
             <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              name="name"
               placeholder="Rainbow card"
               className="hairline mt-2 w-full rounded-xl bg-[var(--paper)] px-4 text-[19px] font-medium normal-case tracking-normal text-[var(--ink)]"
               style={{ minHeight: 56 }}
@@ -119,8 +137,8 @@ export default function AddCard({ onAdd }: Props) {
           <label className="mt-4 block text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--ink-muted)]">
             Price
             <input
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              name="price"
+              inputMode="decimal"
               placeholder="50c"
               className="hairline mt-2 w-full rounded-xl bg-[var(--paper)] px-4 text-[19px] font-medium normal-case tracking-normal text-[var(--ink)]"
               style={{ minHeight: 56 }}
@@ -128,20 +146,8 @@ export default function AddCard({ onAdd }: Props) {
           </label>
 
           <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={add}
-              disabled={!photo}
-              className={`rounded-full px-7 text-[18px] font-semibold transition-colors ${
-                photo
-                  ? "bg-[var(--accent)] text-[var(--accent-ink)]"
-                  : "hairline cursor-not-allowed bg-[var(--paper)] text-[var(--ink-muted)]"
-              }`}
-              style={{ minHeight: 56 }}
-            >
-              Put it in the shop
-            </button>
-            {photo && (
+            <Submit hasPhoto={Boolean(blob)} />
+            {preview && (
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
@@ -158,8 +164,13 @@ export default function AddCard({ onAdd }: Props) {
               {error}
             </p>
           )}
+          {state.ok && !error && (
+            <p role="status" className="mt-3 text-[15px] font-medium text-[var(--ink-muted)]">
+              {state.ok}
+            </p>
+          )}
         </div>
       </div>
-    </section>
+    </form>
   );
 }
