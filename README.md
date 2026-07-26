@@ -17,9 +17,22 @@ self-registration always produces a buyer, so it cannot be used to grant privile
 The first owner is seeded from environment variables the first time the app runs. No credentials
 are stored in this repo.
 
+## Photo-assisted listing
+
+Photograph a card and the listing fills itself in. The photo is sent to Claude, which reads the
+card's name off the artwork and pre-fills the form; the shopkeeper can overwrite anything before
+publishing.
+
+This is strictly an assist. If `ANTHROPIC_API_KEY` is unset, the call fails, or the model declines,
+the form simply stays blank and gets typed in by hand — adding a card never depends on it. Fields
+already filled are never overwritten.
+
+The model is told not to guess a price: it suggests one only when the photo shows a price, and
+otherwise leaves it blank.
+
 ## What you must provision
 
-The app needs two stores and four environment variables. Until they exist the site shows a
+The app needs two stores and a handful of environment variables. Until they exist the site shows a
 "being set up" page instead of crashing.
 
 1. **Postgres** — any provider. Use the *pooled* connection string; a direct one will exhaust
@@ -32,14 +45,17 @@ BLOB_READ_WRITE_TOKEN=…          # from the Blob store
 OWNER_EMAIL=you@example.com      # seeds the first owner on first run
 OWNER_PASSWORD=…                 # use a real password; change it after first sign-in
 OWNER_NAME=Cam                   # optional, defaults to "Owner"
+ANTHROPIC_API_KEY=…              # optional — enables photo-assisted listing
 ```
 
 There is no migration step. The schema is created on first use and every statement is idempotent,
 so deploying is just a git push.
 
-> **Vercel project setting:** the project's *Output Directory* must be cleared (empty / auto).
-> It is currently `out`, left over from when this was a static export. With it set, the Next.js
-> builder fails looking for `routes-manifest.json` and no server code can deploy.
+> **Why `vercel.json` pins `outputDirectory`:** the Vercel project still has an Output Directory of
+> `out`, left over from when this was a static export, and that setting applies to a build which now
+> emits `.next`. Setting `outputDirectory` to `.next` in `vercel.json` overrides it from the
+> repository, so no dashboard change is needed. Clearing the project setting is the tidier end state
+> — at which point the key can be dropped.
 
 ## Security notes
 

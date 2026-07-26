@@ -8,3 +8,8 @@
 export type ActionState = { error?: string; ok?: string };
 
 export type FormAction = (prev: ActionState, form: FormData) => Promise<ActionState>;
+
+/** What the vision pass suggests for a photographed card. Null when unavailable. */
+export type Suggestion = { name: string; price: string; isCard: boolean } | null;
+
+export type SuggestResult = { suggestion: Suggestion; error?: string };

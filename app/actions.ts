@@ -16,8 +16,9 @@ import {
 } from "../lib/auth";
 import { ensureReady } from "../lib/bootstrap";
 import { createCard, deleteCard, parsePrice, setStatus, updateCard } from "../lib/cards-db";
+import { isVisionConfigured, suggestFromPhoto } from "../lib/vision";
 
-import type { ActionState } from "../lib/action-state";
+import type { ActionState, SuggestResult } from "../lib/action-state";
 export type { ActionState };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -143,4 +144,30 @@ export async function removeCard(form: FormData) {
   await deleteCard(String(form.get("id") ?? ""));
   revalidatePath("/");
   revalidatePath("/manage");
+}
+
+/**
+ * Reads a just-taken photo and returns suggested form values.
+ *
+ * Deliberately non-fatal: any failure returns an empty suggestion so the
+ * shopkeeper simply types the card in herself. Adding a card must never
+ * depend on the vision pass succeeding.
+ */
+export async function suggestCard(form: FormData): Promise<SuggestResult> {
+  if (!canManageInventory(await currentUser())) return { suggestion: null };
+  if (!isVisionConfigured()) return { suggestion: null };
+
+  const photo = form.get("photo");
+  if (!(photo instanceof File) || photo.size === 0) return { suggestion: null };
+  if (photo.size > 6_000_000) return { suggestion: null };
+
+  try {
+    const suggestion = await suggestFromPhoto(photo);
+    if (suggestion && !suggestion.isCard) {
+      return { suggestion: null, error: "That does not look like a card. You can still name it yourself." };
+    }
+    return { suggestion };
+  } catch {
+    return { suggestion: null, error: "Could not read the photo. Type the name yourself." };
+  }
 }

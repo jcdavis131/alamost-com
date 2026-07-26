@@ -10,7 +10,8 @@ import { canManageInventory, canManagePeople, currentUser } from "../../lib/auth
 import { isDatabaseConfigured, sql } from "../../lib/db";
 import { ensureReady } from "../../lib/bootstrap";
 import { formatPrice, listAll } from "../../lib/cards-db";
-import { addCard, changeStatus, createPerson, removeCard } from "../actions";
+import { addCard, changeStatus, createPerson, removeCard, suggestCard } from "../actions";
+import { isVisionConfigured } from "../../lib/vision";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Manage — Lina's Card Shop" };
@@ -42,7 +43,7 @@ export default async function ManagePage() {
         </p>
 
         <div className="mt-6">
-          <AddCard action={addCard} />
+          <AddCard action={addCard} suggest={isVisionConfigured() ? suggestCard : undefined} />
         </div>
 
         <h2 className="display mt-14 text-[26px] sm:text-[30px]">Inventory</h2>

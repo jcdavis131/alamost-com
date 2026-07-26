@@ -2,7 +2,7 @@
 import { useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { preparePhoto } from "../lib/photo";
-import type { ActionState } from "../lib/action-state";
+import type { ActionState, SuggestResult } from "../lib/action-state";
 
 function Submit({ hasPhoto }: { hasPhoto: boolean }) {
   const { pending } = useFormStatus();
@@ -25,24 +25,35 @@ function Submit({ hasPhoto }: { hasPhoto: boolean }) {
 
 export default function AddCard({
   action,
+  suggest,
 }: {
   action: (prev: ActionState, form: FormData) => Promise<ActionState>;
+  /** Absent when no vision key is configured — the form still works, just unassisted. */
+  suggest?: (form: FormData) => Promise<SuggestResult>;
 }) {
   const [state, formAction] = useFormState(action, {});
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [blob, setBlob] = useState<Blob | null>(null);
   const [busy, setBusy] = useState(false);
+  const [reading, setReading] = useState(false);
+  const [filled, setFilled] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+
+  // Controlled so a suggestion can populate them; the shopkeeper can overwrite.
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
 
   async function pick(file: File | undefined) {
     if (!file) return;
     setBusy(true);
     setLocalError(null);
+    setFilled(false);
     try {
       const prepared = await preparePhoto(file);
       setBlob(prepared.blob);
       setPreview(prepared.previewUrl);
+      if (suggest) void fill(prepared.blob);
     } catch {
       setLocalError("That photo would not open. Try taking it again.");
     } finally {
@@ -50,17 +61,43 @@ export default function AddCard({
     }
   }
 
-  // The <input type=file> holds the original multi-megabyte photo. Swap in the
-  // downscaled blob so that is what gets uploaded.
+  /** Reads the photo and pre-fills the form. Never blocks adding the card. */
+  async function fill(photo: Blob) {
+    if (!suggest) return;
+    setReading(true);
+    try {
+      const body = new FormData();
+      body.set("photo", photo, "card.jpg");
+      const { suggestion, error } = await suggest(body);
+      if (error) setLocalError(error);
+      if (suggestion) {
+        // Only fill blanks — never overwrite something already typed.
+        setName((n) => n || suggestion.name);
+        setPrice((p) => p || suggestion.price);
+        if (suggestion.name) setFilled(true);
+      }
+    } catch {
+      // Suggestion is a convenience; failing it is not worth surfacing.
+    } finally {
+      setReading(false);
+    }
+  }
+
   function submit(form: FormData) {
+    // The file input still holds the original multi-megabyte photo.
     if (blob) form.set("photo", blob, "card.jpg");
     formAction(form);
     setPreview(null);
     setBlob(null);
+    setName("");
+    setPrice("");
+    setFilled(false);
     if (fileRef.current) fileRef.current.value = "";
   }
 
   const error = localError ?? state.error;
+  const field =
+    "hairline mt-2 w-full rounded-xl bg-[var(--paper)] px-4 text-[19px] font-medium normal-case tracking-normal text-[var(--ink)]";
 
   return (
     <form
@@ -72,7 +109,9 @@ export default function AddCard({
         Add a card
       </h2>
       <p className="mt-1 text-[15px] text-[var(--ink-muted)]">
-        Take a photo of the card you want to sell.
+        {suggest
+          ? "Take a photo and the name fills itself in."
+          : "Take a photo of the card you want to sell."}
       </p>
 
       {/* capture="environment" opens the back camera straight away on a phone. */}
@@ -125,11 +164,24 @@ export default function AddCard({
 
         <div className="flex-1">
           <label className="block text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--ink-muted)]">
-            Name
+            <span className="flex items-baseline gap-2">
+              Name
+              {reading && <span className="normal-case tracking-normal">reading the card…</span>}
+              {filled && !reading && (
+                <span className="normal-case tracking-normal text-[var(--accent)]">
+                  filled in for you
+                </span>
+              )}
+            </span>
             <input
               name="name"
-              placeholder="Rainbow card"
-              className="hairline mt-2 w-full rounded-xl bg-[var(--paper)] px-4 text-[19px] font-medium normal-case tracking-normal text-[var(--ink)]"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                setFilled(false);
+              }}
+              placeholder={reading ? "…" : "Rainbow card"}
+              className={field}
               style={{ minHeight: 56 }}
             />
           </label>
@@ -138,9 +190,11 @@ export default function AddCard({
             Price
             <input
               name="price"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
               inputMode="decimal"
               placeholder="50c"
-              className="hairline mt-2 w-full rounded-xl bg-[var(--paper)] px-4 text-[19px] font-medium normal-case tracking-normal text-[var(--ink)]"
+              className={field}
               style={{ minHeight: 56 }}
             />
           </label>
