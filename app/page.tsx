@@ -27,7 +27,8 @@ export default async function Page() {
       <main className="mx-auto w-full max-w-[1080px] flex-1 px-6 pb-20 pt-10">
         {failed ? (
           <Notice>
-            The shop cannot reach its database right now. Nothing has been lost — try again shortly.
+            The shop cannot reach its database right now. Nothing has been lost
+            — try again shortly.
           </Notice>
         ) : cards.length === 0 ? (
           <Notice>The shop is empty right now. Come back soon.</Notice>
@@ -49,7 +50,9 @@ export default async function Page() {
                     />
                   </div>
                   <div className="mt-3 flex items-baseline justify-between gap-3">
-                    <h2 className="display min-w-0 break-words text-[21px] leading-snug">{card.name}</h2>
+                    <h2 className="display min-w-0 break-words text-[21px] leading-snug">
+                      {card.name}
+                    </h2>
                     <p className="shrink-0 text-[16px] font-semibold text-[var(--accent)]">
                       {formatPrice(card.priceCents)}
                     </p>
@@ -74,23 +77,26 @@ function Notice({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Shown before a database has been attached, instead of a crash. */
+/**
+ * Shown before a database is attached, instead of a crash.
+ *
+ * This is a public page on a public domain, so it stays a plain "not open
+ * yet" notice. Naming the environment variables here would tell every
+ * visitor how the shop is wired; the setup steps live in the README, which
+ * is where whoever is deploying it will be looking anyway.
+ */
 function NotConfigured() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-6">
-      <div className="hairline max-w-[520px] rounded-2xl bg-[var(--paper-raised)] p-8">
-        <h1 className="display text-[30px]">Lina&apos;s Card Shop</h1>
-        <p className="mt-3 text-[17px] text-[var(--ink-muted)]">
-          The shop is being set up. It needs a database before it can open.
-        </p>
-        <p className="mt-4 text-[15px] text-[var(--ink-muted)]">
-          Set <code className="font-mono text-[14px]">DATABASE_URL</code>,{" "}
-          <code className="font-mono text-[14px]">BLOB_READ_WRITE_TOKEN</code>,{" "}
-          <code className="font-mono text-[14px]">OWNER_EMAIL</code> and{" "}
-          <code className="font-mono text-[14px]">OWNER_PASSWORD</code> in the project&apos;s
-          environment variables, then redeploy.
-        </p>
-      </div>
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
+      <h1 className="display text-[34px] sm:text-[40px]">
+        Lina&apos;s Card Shop
+      </h1>
+      <p className="mt-3 max-w-[34ch] text-[18px] text-[var(--ink-muted)]">
+        Not open yet. Come back soon.
+      </p>
+      <p className="mt-10 text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--ink-muted)]">
+        alamost.com
+      </p>
     </div>
   );
 }

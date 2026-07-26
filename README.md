@@ -69,17 +69,42 @@ so deploying is just a git push.
 - Card photos are public and permanently fetchable once uploaded. Photograph cards on a plain
   surface — anything else in frame is public too.
 
-## Develop
+## Run it on your own machine
 
-Requires a local Postgres. Without `BLOB_READ_WRITE_TOKEN`, photos are written to
-`public/uploads` so the whole flow works offline; that fallback refuses to run in production,
-where serverless filesystems are ephemeral.
+The shop runs fully offline — no Vercel, no cloud database, no API keys. Photos are written to
+`public/uploads` instead of Blob storage, and the listing autofill is simply off. That fallback
+deliberately refuses to run in production, where serverless filesystems are ephemeral and
+per-instance.
 
 ```bash
 npm install
-cp .env.example .env.local     # then fill it in
-npm run dev
+npm run db:up                  # Postgres 16 in Docker on port 5433
+cp .env.example .env.local
+npm run dev                    # http://localhost:3000
 ```
+
+Put this in `.env.local` — it matches what `db:up` starts:
+
+```
+DATABASE_URL=postgres://shop:shop@localhost:5433/shop?sslmode=disable
+OWNER_EMAIL=you@example.com
+OWNER_PASSWORD=pick-something
+```
+
+`sslmode=disable` matters: without it the client requires TLS, which a local Postgres will not
+offer. Port 5433 rather than 5432 so it never collides with a Postgres you already run.
+
+First page load creates the schema and seeds the owner, so there is nothing to migrate. Sign in
+at `/login`, then change the password at `/account`.
+
+`npm run db:down` stops it; `npm run db:reset` wipes the data and starts clean.
+
+**One thing local hosting cannot do:** serve the shop at alamost.com. Buyers can't reach your
+machine, so this is the right setup for developing and for using the shop on your own network —
+not for a shop other people browse. That needs a hosted database.
+
+Already have Postgres and would rather not use Docker? Skip `db:up` and point `DATABASE_URL` at
+whatever you have.
 
 ## Deploy
 

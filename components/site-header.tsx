@@ -8,7 +8,10 @@ export default async function SiteHeader({ count }: { count?: number }) {
   return (
     <header className="hairline border-x-0 border-t-0 bg-[var(--paper-raised)]">
       <div className="mx-auto flex max-w-[1080px] flex-wrap items-baseline justify-between gap-x-6 gap-y-3 px-6 py-6">
-        <Link href="/" className="display text-[28px] leading-none sm:text-[34px]">
+        <Link
+          href="/"
+          className="display text-[28px] leading-none sm:text-[34px]"
+        >
           Lina&apos;s Card Shop
         </Link>
 
@@ -19,22 +22,42 @@ export default async function SiteHeader({ count }: { count?: number }) {
             </span>
           )}
           {canManageInventory(user) && (
-            <Link href="/manage" className="font-semibold underline underline-offset-4">
+            <Link
+              href="/manage"
+              className="font-semibold underline underline-offset-4"
+            >
               Manage
             </Link>
           )}
           {user ? (
-            <form action={signOut}>
-              <button type="submit" className="font-semibold text-[var(--ink-muted)] hover:text-[var(--accent)]">
-                Sign out {user.displayName}
-              </button>
-            </form>
+            <>
+              <Link
+                href="/account"
+                className="font-semibold underline underline-offset-4"
+              >
+                Account
+              </Link>
+              <form action={signOut}>
+                <button
+                  type="submit"
+                  className="font-semibold text-[var(--ink-muted)] hover:text-[var(--accent)]"
+                >
+                  Sign out {user.displayName}
+                </button>
+              </form>
+            </>
           ) : (
             <>
-              <Link href="/login" className="font-semibold underline underline-offset-4">
+              <Link
+                href="/login"
+                className="font-semibold underline underline-offset-4"
+              >
                 Sign in
               </Link>
-              <Link href="/join" className="font-semibold text-[var(--ink-muted)] hover:text-[var(--accent)]">
+              <Link
+                href="/join"
+                className="font-semibold text-[var(--ink-muted)] hover:text-[var(--accent)]"
+              >
                 Create account
               </Link>
             </>
