@@ -6,7 +6,7 @@ export default function Footer() {
           Lina&apos;s Card Shop
         </p>
         <p className="text-[14px] text-[var(--ink-muted)]">
-          Cards are kept on this device.
+          Cards are kept in the shop.
         </p>
       </div>
     </footer>
