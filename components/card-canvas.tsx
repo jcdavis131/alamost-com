@@ -1,233 +1,189 @@
 "use client";
-import { useEffect, useRef, useCallback, useState } from "react";
-import { okabeIto, PALETTE, getTripleEncoding, getDirectionFromDelta } from "../lib/okabe-ito";
-import type { CardItem } from "../lib/cards";
-import { slopScan, scrubCaption } from "../lib/slop-lite";
+import { useCallback, useEffect, useRef } from "react";
+import { accents, type KidCard } from "../lib/cards";
 
-type Props = { card: CardItem; expose?: (canvas: HTMLCanvasElement)=>void };
+type Props = { card: KidCard; expose?: (canvas: HTMLCanvasElement) => void };
 
-function drawRounded(ctx: CanvasRenderingContext2D, x:number, y:number, w:number, h:number, r:number){
-  const rr = Math.min(r, w/2, h/2);
+/** Preview and export share this aspect, so what she sees is what prints. */
+export const CARD_ASPECT = 4 / 5;
+const PREVIEW_W = 900;
+const EXPORT_W = 1080;
+
+const kindLabel: Record<KidCard["kind"], string> = {
+  animal: "ANIMAL",
+  number: "NUMBER",
+  shape: "SHAPE",
+};
+
+const FONT = `system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`;
+
+function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  const rr = Math.min(r, w / 2, h / 2);
   ctx.beginPath();
-  ctx.moveTo(x+rr, y);
-  ctx.arcTo(x+w, y, x+w, y+h, rr);
-  ctx.arcTo(x+w, y+h, x, y+h, rr);
-  ctx.arcTo(x, y+h, x, y, rr);
-  ctx.arcTo(x, y, x+w, y, rr);
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
   ctx.closePath();
+}
+
+/** Shrink the font until the text fits maxW, so long words like ELEPHANT stay on one line. */
+function fitFont(ctx: CanvasRenderingContext2D, text: string, weight: number, startPx: number, maxW: number) {
+  let size = startPx;
+  for (;;) {
+    ctx.font = `${weight} ${size}px ${FONT}`;
+    if (ctx.measureText(text).width <= maxW || size <= startPx * 0.4) return size;
+    size -= Math.max(1, Math.round(startPx * 0.02));
+  }
+}
+
+/** Draws the full card at any width; every measure is relative so preview and export match. */
+function paint(ctx: CanvasRenderingContext2D, card: KidCard, W: number) {
+  const H = Math.round(W / CARD_ASPECT);
+  const accent = accents[card.accent];
+
+  // Paper background — white so the card is cheap to print and easy to colour on.
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillRect(0, 0, W, H);
+
+  const m = W * 0.045;
+  const cardW = W - m * 2;
+  const cardH = H - m * 2;
+  const radius = W * 0.06;
+
+  // Thick accent frame.
+  ctx.fillStyle = accent.bg;
+  roundRect(ctx, m, m, cardW, cardH, radius);
+  ctx.fill();
+
+  // Inner paper, leaving the frame visible as a border.
+  const b = W * 0.022;
+  ctx.fillStyle = "#FFFFFF";
+  roundRect(ctx, m + b, m + b, cardW - b * 2, cardH - b * 2, radius - b);
+  ctx.fill();
+
+  const inX = m + b;
+  const inW = cardW - b * 2;
+  const inY = m + b;
+  const inH = cardH - b * 2;
+
+  // Category banner across the top.
+  const bannerH = inH * 0.1;
+  ctx.save();
+  roundRect(ctx, inX, inY, inW, bannerH + radius, radius - b);
+  ctx.clip();
+  ctx.fillStyle = accent.bg;
+  ctx.fillRect(inX, inY, inW, bannerH);
+  ctx.restore();
+
+  ctx.fillStyle = accent.ink;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `800 ${W * 0.045}px ${FONT}`;
+  ctx.fillText(kindLabel[card.kind], inX + inW / 2, inY + bannerH / 2);
+
+  // Letter badge, for sounding out the first letter.
+  const badgeR = W * 0.072;
+  const badgeCx = inX + inW - badgeR - W * 0.05;
+  const badgeCy = inY + bannerH + badgeR * 0.9;
+  ctx.fillStyle = accent.bg;
+  ctx.beginPath();
+  ctx.arc(badgeCx, badgeCy, badgeR, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = accent.ink;
+  ctx.font = `800 ${badgeR * 1.15}px ${FONT}`;
+  ctx.fillText(card.letter, badgeCx, badgeCy + badgeR * 0.04);
+
+  // Art. Number cards repeat the art so it can be counted out loud.
+  const artZoneTop = inY + bannerH;
+  const artZoneH = inH * 0.46;
+  const artCy = artZoneTop + artZoneH / 2;
+  const n = card.count ?? 1;
+
+  if (n === 1) {
+    ctx.font = `400 ${W * 0.34}px ${FONT}`;
+    ctx.fillText(card.art, inX + inW / 2, artCy);
+  } else {
+    // Two rows once past three, so five items don't shrink to nothing.
+    const perRow = n <= 3 ? n : Math.ceil(n / 2);
+    const rows = Math.ceil(n / perRow);
+    const glyph = Math.min(W * 0.17, (inW * 0.82) / perRow);
+    ctx.font = `400 ${glyph}px ${FONT}`;
+    const rowH = glyph * 1.15;
+    let startY = artCy - ((rows - 1) * rowH) / 2;
+    // A full top row reaches under the letter badge, so drop the rows clear of it.
+    const clearOf = badgeCy + badgeR + glyph * 0.5;
+    if (startY < clearOf) startY = clearOf;
+    let drawn = 0;
+    for (let r = 0; r < rows; r++) {
+      const inRow = Math.min(perRow, n - drawn);
+      const startX = inX + inW / 2 - ((inRow - 1) * glyph * 1.1) / 2;
+      for (let i = 0; i < inRow; i++) {
+        ctx.fillText(card.art, startX + i * glyph * 1.1, startY + r * rowH);
+      }
+      drawn += inRow;
+    }
+  }
+
+  // The big word.
+  const nameSize = fitFont(ctx, card.name, 800, W * 0.15, inW * 0.84);
+  ctx.fillStyle = "#111110";
+  ctx.font = `800 ${nameSize}px ${FONT}`;
+  ctx.fillText(card.name, inX + inW / 2, artZoneTop + artZoneH + inH * 0.1);
+
+  // One simple sentence.
+  const factSize = fitFont(ctx, card.fact, 500, W * 0.052, inW * 0.86);
+  ctx.fillStyle = "#3F3F3A";
+  ctx.font = `500 ${factSize}px ${FONT}`;
+  ctx.fillText(card.fact, inX + inW / 2, artZoneTop + artZoneH + inH * 0.2);
+
+  // Shop mark.
+  ctx.fillStyle = accent.bg;
+  ctx.font = `700 ${W * 0.036}px ${FONT}`;
+  ctx.fillText("Lina's Card Shop", inX + inW / 2, inY + inH - inH * 0.055);
 }
 
 export default function CardCanvas({ card, expose }: Props) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const [toast, setToast] = useState<string | null>(null);
 
-  const render = useCallback((W:number, H:number, hiRes=false)=>{
+  useEffect(() => {
     const c = ref.current;
     if (!c) return;
-    // use offscreen for export if hiRes requested
-    const canvas = hiRes ? document.createElement("canvas") : c;
-    canvas.width = W; canvas.height = H;
-    const ctx = canvas.getContext("2d")!;
+    c.width = PREVIEW_W;
+    c.height = Math.round(PREVIEW_W / CARD_ASPECT);
+    const ctx = c.getContext("2d");
     if (!ctx) return;
-
-    // AAA base bg
-    ctx.fillStyle = PALETTE.bg; // #0F172A 15.2:1 white
-    ctx.fillRect(0,0,W,H);
-
-    // card container minus 56px tab safe-area + 24 footer
-    const pad = Math.round(W*0.04);
-    const footerReserve = 56;
-    const cardX = pad, cardY = pad;
-    const cardW = W - pad*2;
-    const cardH = H - pad*2 - footerReserve - 28;
-
-    // card
-    ctx.fillStyle = PALETTE.cardBg;
-    drawRounded(ctx, cardX, cardY, cardW, cardH, 24);
-    ctx.fill();
-    ctx.strokeStyle = PALETTE.cardBorder;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    const accentMap: Record<string,string> = {
-      blue: okabeIto.blue,
-      orange: okabeIto.orange,
-      green: okabeIto.green,
-      vermillion: okabeIto.vermillion,
-      sky: okabeIto.sky,
-      purple: okabeIto.purple,
-      yellow: okabeIto.yellow,
-      black: okabeIto.black,
-      default: PALETTE.itoBlue,
-    };
-    const accent = accentMap[card.accent] || accentMap.default;
-
-    // direction guess from badge/title for triple-encoding
-    let dir = getDirectionFromDelta(0);
-    if (/up|▲|\+/.test(card.badge) || card.subtitle.includes("+")) dir = "up" as const;
-    else if (/down|▼|-/.test(card.badge) && !card.subtitle.includes("coin")) dir = "down" as const;
-    const triple = getTripleEncoding(dir as any);
-
-    // stripe: Okabe accent + triple color overlay
-    ctx.fillStyle = accent;
-    drawRounded(ctx, cardX, cardY, cardW, 10, 10);
-    ctx.fill();
-    ctx.fillRect(cardX, cardY+5, cardW, 5); // fix bottom clip
-
-    // small triple-color sliver second line for AAA triple-encoding
-    ctx.fillStyle = triple.color;
-    ctx.fillRect(cardX, cardY+10, 64, 4);
-
-    // scrub all text inputs via slop-lite
-    const title = scrubCaption(card.title);
-    const subtitle = scrubCaption(card.subtitle);
-    const drivers = (card.drivers||[]).map(scrubCaption).slice(0,3);
-
-    // ticker/title 18px/1.65 readable scaled for canvas
-    const titleSize = Math.round(W*0.064);
-    ctx.fillStyle = PALETTE.textPrimary;
-    ctx.font = `800 ${titleSize}px Inter, ui-sans-system, system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
-    ctx.textBaseline = "top";
-    ctx.fillText(title, cardX+32, cardY+36);
-
-    // subtitle 56B4E9 + AAA secondary
-    ctx.fillStyle = PALETTE.textSecondary;
-    ctx.font = `500 ${Math.round(W*0.028)}px Inter, system-ui, sans-serif`;
-    ctx.fillText(subtitle, cardX+32, cardY+36+titleSize+16);
-
-    // conf pill with triple encoding: shape+icon+text+pattern (AAA)
-    const badgeY = cardY+36+titleSize+16+38;
-    const badgeW = 220, badgeH = 44;
-    ctx.fillStyle = PALETTE.pillBgLight;
-    drawRounded(ctx, cardX+32, badgeY, badgeW, badgeH, 12);
-    ctx.fill();
-    ctx.fillStyle = triple.color;
-    ctx.font = `700 ${Math.round(W*0.022)}px ui-monospace, SFMono-Regular, monospace`;
-    ctx.fillText(`${triple.icon} ${triple.label} ${triple.shape}`, cardX+48, badgeY+14);
-
-    // pattern overlay — diagonal-up / diagonal-down / dots
-    if (triple.pattern !== "solid") {
-      ctx.save();
-      ctx.strokeStyle = triple.color;
-      ctx.lineWidth = 1.2;
-      ctx.globalAlpha = 0.9;
-      if (triple.pattern === "diagonal-up") {
-        ctx.setLineDash([6,4]);
-        ctx.strokeRect(cardX+32, badgeY, badgeW, badgeH);
-        ctx.setLineDash([]);
-      } else if (triple.pattern === "diagonal-down") {
-        ctx.setLineDash([2,6]);
-        ctx.strokeRect(cardX+32, badgeY, badgeW, badgeH);
-        ctx.setLineDash([]);
-      } else {
-        // dots simulated via short ticks
-        for(let i=0;i<badgeW;i+=12){ ctx.fillStyle=triple.color; ctx.fillRect(cardX+32+i, badgeY+badgeH-3, 6,2); }
-      }
-      ctx.restore();
-    }
-
-    // price row AAA contrast
-    ctx.fillStyle = PALETTE.textPrimary;
-    ctx.font = `700 ${Math.round(W*0.052)}px Inter, sans-serif`;
-    ctx.fillText(`$${(card as any).price?.replace("$","") || "4.00"}`, cardX+32, badgeY+76);
-
-    // conf + asof + model — 18px/1.65 logic (canvas 24px ≈ 18px readable)
-    ctx.fillStyle = PALETTE.textSecondary;
-    ctx.font = `500 ${Math.round(W*0.024)}px Inter, sans-serif`;
-    const meta = `conf ${(card.conf*100).toFixed(0)}% • ${card.asof.slice(0,10)} • ${scrubCaption(card.model)}`;
-    // slop-scan meta before render — inline
-    const scannedMeta = slopScan(meta).fixed;
-    ctx.fillText(scannedMeta, cardX+32, badgeY+76+Math.round(W*0.06));
-
-    // drivers with shape triple
-    let y = badgeY+76+Math.round(W*0.06)+36;
-    drivers.forEach((d,i)=>{
-      // shape square/circle/tri
-      ctx.fillStyle = accent;
-      if (i===0){ ctx.fillRect(cardX+32, y-10, 10,10); }
-      else if (i===1){ ctx.beginPath(); ctx.arc(cardX+37, y-5, 6,0,Math.PI*2); ctx.fill(); }
-      else { ctx.beginPath(); ctx.moveTo(cardX+32, y-2); ctx.lineTo(cardX+42, y-2); ctx.lineTo(cardX+37, y-12); ctx.closePath(); ctx.fill(); }
-
-      ctx.fillStyle = PALETTE.textSecondary;
-      ctx.font = `400 ${Math.round(W*0.026)}px Inter, sans-serif`;
-      // scrub + ensure not corporate hedged
-      const cleanD = slopScan(d).fixed || d;
-      ctx.fillText(`▣ ${cleanD}`, cardX+56, y);
-      y+=38;
-    });
-
-    // league triple encoding legend
-    ctx.fillStyle = PALETTE.textMuted;
-    ctx.font = `500 ${Math.round(W*0.016)}px Inter, sans-serif`;
-    ctx.fillText(`shape + icon + text + pattern = triple-encoding • AAA ${title.includes("•")?title.split("•")[1].trim():""}`, cardX+32, cardY+cardH-72);
-
-    // minimal footer — AAA muted allowed for footer only per template
-    ctx.fillStyle = PALETTE.textMuted;
-    ctx.font = `400 ${Math.round(W*0.016)}px Inter, sans-serif`;
-    ctx.fillText(`as of ${card.asof.slice(0,10)} • ${card.model} • not financial advice • alamost.com`, cardX+32, cardY+cardH-32);
-
-    // safe-area footnote
-    ctx.fillStyle = PALETTE.textMuted;
-    ctx.globalAlpha = 0.8;
-    ctx.font = `400 12px Inter, sans-serif`;
-    if (!hiRes) ctx.fillText("minimal footer • 56px tab safe-area • offline-first • canvas client-only", pad, H-18);
-    ctx.globalAlpha = 1;
-
-    if (!hiRes && expose) expose(c);
-    if (hiRes) return canvas as HTMLCanvasElement;
-    return undefined as any;
+    paint(ctx, card, PREVIEW_W);
+    expose?.(c);
   }, [card, expose]);
 
-  useEffect(()=>{
-    // preview 900x1200, matches equities template aspect 3/4
-    render(900,1200,false);
-  }, [render]);
-
-  const onExport = useCallback(async ()=>{
-    const W=1080, H=1350;
-    // IG export
-    const out = render(W,H,true) as unknown as HTMLCanvasElement;
-    if (!out){setToast("Export failed"); return;}
-    try{
-      const url = out.toDataURL("image/png");
-      const a = document.createElement("a");
-      const safeId = (card.id||card.title||"card").replace(/[^a-z0-9-_]/gi,"_");
-      a.href = url; a.download = `card-${safeId}-${new Date().toISOString().slice(0,10)}.png`;
-      a.click();
-      setToast(`Exported 1080×1350 PNG`);
-      setTimeout(()=>setToast(null),2000);
-    }catch{
-      setToast("Export blocked — try Chrome");
-      setTimeout(()=>setToast(null),2500);
-    }
-  }, [render, card]);
-
   return (
-    <div className="relative w-full">
-      <canvas
-        ref={ref}
-        className="w-full h-auto rounded-[12px] border border-black/[0.08] bg-[#0F172A]"
-        style={{ aspectRatio:"3/4", background:"#0F172A" }}
-        aria-label={`${card.title} card preview with shape ${card.badge} triple-encoding`}
-      />
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={onExport}
-          className="inline-flex items-center gap-2 rounded-full bg-[#0F172A] px-4 py-2 text-[14px] font-[650] text-white hover:bg-[#1E293B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#56B4E9] focus-visible:ring-offset-2"
-          style={{ minHeight:44 }}
-        >
-          <span aria-hidden>⬇</span> Export PNG
-        </button>
-        <span className="text-[12px] text-[#94A3B8]">client-only • 1080×1350 IG • toDataURL</span>
-        {toast && <span role="status" className="ml-auto text-[12px] font-[600] text-[#009E73]">{toast}</span>}
-      </div>
-    </div>
+    <canvas
+      ref={ref}
+      className="h-auto w-full rounded-[14px]"
+      style={{ aspectRatio: "4 / 5" }}
+      role="img"
+      aria-label={`${card.name} card. ${card.fact} Starts with the letter ${card.letter}.`}
+    />
   );
 }
 
-export function exportPng(canvas: HTMLCanvasElement, filename: string){
-  const url = canvas.toDataURL("image/png");
-  const a = document.createElement("a");
-  a.href = url; a.download = filename; a.click();
+/** Renders the card fresh at print size and downloads it. */
+export function downloadCard(card: KidCard) {
+  const canvas = document.createElement("canvas");
+  canvas.width = EXPORT_W;
+  canvas.height = Math.round(EXPORT_W / CARD_ASPECT);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return false;
+  paint(ctx, card, EXPORT_W);
+  try {
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = `lina-${card.id}.png`;
+    a.click();
+    return true;
+  } catch {
+    return false;
+  }
 }
