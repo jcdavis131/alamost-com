@@ -59,6 +59,11 @@ export default function AuthForm({
           {state.error}
         </p>
       )}
+      {state.ok && !state.error && (
+        <p role="status" className="mt-5 text-[15px] font-medium text-[var(--ink-muted)]">
+          {state.ok}
+        </p>
+      )}
 
       <Submit label={submitLabel} />
     </form>

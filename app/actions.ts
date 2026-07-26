@@ -5,11 +5,13 @@ import { redirect } from "next/navigation";
 import {
   canManageInventory,
   canManagePeople,
+  changePassword,
   createSession,
   createUser,
   currentUser,
   destroySession,
   findUserByEmail,
+  findUserById,
   isDuplicate,
   verifyPassword,
   type Role,
@@ -170,4 +172,35 @@ export async function suggestCard(form: FormData): Promise<SuggestResult> {
   } catch {
     return { suggestion: null, error: "Could not read the photo. Type the name yourself." };
   }
+}
+
+/**
+ * Changes the signed-in user's own password.
+ *
+ * The current password is required, so a borrowed session cannot be used to
+ * lock the real owner out. This is also how the owner moves off the password
+ * that OWNER_PASSWORD seeded them with.
+ */
+export async function changeOwnPassword(_prev: ActionState, form: FormData): Promise<ActionState> {
+  await ensureReady();
+  const me = await currentUser();
+  if (!me) return { error: "Sign in first." };
+
+  const currentPassword = String(form.get("currentPassword") ?? "");
+  const newPassword = String(form.get("newPassword") ?? "");
+  const confirm = String(form.get("confirmPassword") ?? "");
+
+  if (newPassword.length < 8) return { error: "Use a new password of at least 8 characters." };
+  if (newPassword !== confirm) return { error: "The two new passwords do not match." };
+
+  const row = await findUserById(me.id);
+  if (!row || !(await verifyPassword(currentPassword, row.password_hash))) {
+    return { error: "That is not your current password." };
+  }
+  if (await verifyPassword(newPassword, row.password_hash)) {
+    return { error: "That is already your password. Pick a different one." };
+  }
+
+  await changePassword(me.id, newPassword);
+  return { ok: "Password changed. Any other devices have been signed out." };
 }

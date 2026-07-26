@@ -151,3 +151,25 @@ export async function findUserByEmail(email: string) {
 export function isDuplicate(err: unknown) {
   return typeof err === "object" && err !== null && (err as { code?: string }).code === "23505";
 }
+
+export async function findUserById(id: string) {
+  const rows = await sql<{ id: string; password_hash: string }[]>`
+    SELECT id, password_hash FROM users WHERE id = ${id} LIMIT 1
+  `;
+  return rows[0] ?? null;
+}
+
+/**
+ * Sets a new password and signs out every *other* session for that user.
+ *
+ * Signing the others out is the point: if the old password leaked, changing it
+ * has to actually evict whoever used it. The caller's own session survives, so
+ * changing your password does not sign you out of the page you are on.
+ */
+export async function changePassword(userId: string, newPassword: string) {
+  const hash = await hashPassword(newPassword);
+  const current = cookies().get(SESSION_COOKIE)?.value;
+  const keep = current ? hashToken(current) : "";
+  await sql`UPDATE users SET password_hash = ${hash} WHERE id = ${userId}`;
+  await sql`DELETE FROM sessions WHERE user_id = ${userId} AND token_hash <> ${keep}`;
+}
