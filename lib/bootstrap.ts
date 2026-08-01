@@ -46,6 +46,55 @@ CREATE TABLE IF NOT EXISTS cards (
 );
 
 CREATE INDEX IF NOT EXISTS cards_status_created_idx ON cards (status, created_at DESC);
+
+-- Sports trading cards carry attributes a homemade card does not. They are all
+-- nullable: a card drawn in felt-tip has no manufacturer, and pretending it
+-- does would make the shop lie about its own stock.
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'homemade'
+  CHECK (kind IN ('homemade', 'sports'));
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS player       TEXT;
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS team         TEXT;
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS sport        TEXT;
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS card_set     TEXT;
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS year         INTEGER;
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS card_number  TEXT;
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS manufacturer TEXT;
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS condition    TEXT;
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS notes        TEXT;
+
+-- Researching a card means searching across everything printed on it, not just
+-- its display name. A stored generated column keeps the index in step with the
+-- row automatically, so there is no trigger to forget.
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS search tsvector
+  GENERATED ALWAYS AS (
+    to_tsvector('english',
+      coalesce(name, '') || ' ' ||
+      coalesce(player, '') || ' ' ||
+      coalesce(team, '') || ' ' ||
+      coalesce(sport, '') || ' ' ||
+      coalesce(card_set, '') || ' ' ||
+      coalesce(manufacturer, '') || ' ' ||
+      coalesce(card_number, '') || ' ' ||
+      coalesce(year::text, '') || ' ' ||
+      coalesce(condition, '') || ' ' ||
+      coalesce(notes, ''))
+  ) STORED;
+
+CREATE INDEX IF NOT EXISTS cards_search_idx ON cards USING GIN (search);
+CREATE INDEX IF NOT EXISTS cards_kind_idx ON cards (kind);
+
+-- A buyer asking Lina to hold a card. This is not a sale: no money moves here,
+-- and the shopkeeper still decides. It exists so "I want that one" survives the
+-- browser tab being closed.
+CREATE TABLE IF NOT EXISTS holds (
+  id         TEXT PRIMARY KEY,
+  card_id    TEXT NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS holds_card_user_idx ON holds (card_id, user_id);
+CREATE INDEX IF NOT EXISTS holds_card_idx ON holds (card_id);
 `;
 
 async function run() {

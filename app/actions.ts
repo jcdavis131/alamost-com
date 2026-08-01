@@ -17,7 +17,17 @@ import {
   type Role,
 } from "../lib/auth";
 import { ensureReady } from "../lib/bootstrap";
-import { createCard, deleteCard, parsePrice, setStatus, updateCard } from "../lib/cards-db";
+import {
+  createCard,
+  deleteCard,
+  isKind,
+  parsePrice,
+  parseYear,
+  setStatus,
+  updateCard,
+  type CardDetails,
+} from "../lib/cards-db";
+import { hold, releaseHold } from "../lib/holds";
 import { isVisionConfigured, suggestFromPhoto } from "../lib/vision";
 
 import type { ActionState, SuggestResult } from "../lib/action-state";
@@ -27,6 +37,43 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function badEmail(email: string) {
   return !EMAIL_RE.test(email) || email.length > 254;
+}
+
+const text = (form: FormData, key: string, max = 80) =>
+  String(form.get(key) ?? "")
+    .trim()
+    .slice(0, max);
+
+/** Empty strings become null, so an untouched field is absent rather than "". */
+const orNull = (value: string) => (value ? value : null);
+
+/**
+ * Pulls the card attributes off a form.
+ *
+ * A homemade card cannot carry sports fields even if a stale input is still
+ * sitting in the DOM — the kind is decided first and the rest follows from it,
+ * so the shop can never end up claiming Lina's felt-tip unicorn was printed by
+ * Topps in 1989.
+ */
+function readDetails(form: FormData): CardDetails {
+  const raw = String(form.get("kind") ?? "homemade");
+  const kind = isKind(raw) ? raw : "homemade";
+  // Notes belong to both kinds — "she drew this on the train" is worth keeping.
+  const notes = orNull(text(form, "notes", 600));
+  if (kind === "homemade") return { kind, notes };
+
+  return {
+    kind,
+    notes,
+    player: orNull(text(form, "player")),
+    team: orNull(text(form, "team")),
+    sport: orNull(text(form, "sport", 40)),
+    cardSet: orNull(text(form, "cardSet")),
+    year: parseYear(text(form, "year", 10)),
+    cardNumber: orNull(text(form, "cardNumber", 20)),
+    manufacturer: orNull(text(form, "manufacturer")),
+    condition: orNull(text(form, "condition", 40)),
+  };
 }
 
 export async function signIn(_prev: ActionState, form: FormData): Promise<ActionState> {
@@ -109,10 +156,10 @@ export async function addCard(_prev: ActionState, form: FormData): Promise<Actio
   if (!photo.type.startsWith("image/")) return { error: "That file is not a picture." };
   if (photo.size > 6_000_000) return { error: "That photo is too big." };
 
-  const name = String(form.get("name") ?? "").trim().slice(0, 80) || "Card";
+  const name = text(form, "name") || "Card";
   const priceCents = parsePrice(String(form.get("price") ?? ""));
 
-  await createCard({ name, priceCents, photo, userId: me!.id });
+  await createCard({ name, priceCents, photo, userId: me!.id, details: readDetails(form) });
   revalidatePath("/");
   revalidatePath("/manage");
   return { ok: `${name} is in the shop.` };
@@ -122,10 +169,15 @@ export async function editCard(_prev: ActionState, form: FormData): Promise<Acti
   await ensureReady();
   if (!canManageInventory(await currentUser())) return { error: "Not allowed." };
   const id = String(form.get("id") ?? "");
-  const name = String(form.get("name") ?? "").trim().slice(0, 80) || "Card";
-  await updateCard(id, { name, priceCents: parsePrice(String(form.get("price") ?? "")) });
+  const name = text(form, "name") || "Card";
+  await updateCard(id, {
+    name,
+    priceCents: parsePrice(String(form.get("price") ?? "")),
+    details: readDetails(form),
+  });
   revalidatePath("/");
   revalidatePath("/manage");
+  revalidatePath(`/card/${id}`);
   return { ok: "Saved." };
 }
 
@@ -145,6 +197,34 @@ export async function removeCard(form: FormData) {
   if (!canManageInventory(await currentUser())) return;
   await deleteCard(String(form.get("id") ?? ""));
   revalidatePath("/");
+  revalidatePath("/manage");
+}
+
+/**
+ * A signed-in buyer asking for a card to be kept for them.
+ *
+ * Any signed-in account can ask — that is the point of a buyer account. No
+ * money moves, so there is nothing here to authorise beyond being a real,
+ * named person the shopkeeper can reply to.
+ */
+export async function askToHold(form: FormData) {
+  await ensureReady();
+  const me = await currentUser();
+  const id = String(form.get("id") ?? "");
+  if (!me || !id) return;
+  await hold(id, me.id);
+  revalidatePath(`/card/${id}`);
+  revalidatePath("/manage");
+}
+
+export async function releaseMyHold(form: FormData) {
+  await ensureReady();
+  const me = await currentUser();
+  const id = String(form.get("id") ?? "");
+  if (!me || !id) return;
+  // Scoped to the caller's own id, so this can only ever cancel your own ask.
+  await releaseHold(id, me.id);
+  revalidatePath(`/card/${id}`);
   revalidatePath("/manage");
 }
 

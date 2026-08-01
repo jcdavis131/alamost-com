@@ -2,7 +2,40 @@
 import { useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { preparePhoto } from "../lib/photo";
-import type { ActionState, SuggestResult } from "../lib/action-state";
+import type { ActionState, Suggestion, SuggestResult } from "../lib/action-state";
+
+/** Every text field the form can carry. Kept as one object so autofill is one merge. */
+type Fields = {
+  kind: "homemade" | "sports";
+  name: string;
+  price: string;
+  player: string;
+  team: string;
+  sport: string;
+  cardSet: string;
+  year: string;
+  cardNumber: string;
+  manufacturer: string;
+  condition: string;
+  notes: string;
+};
+
+const EMPTY: Fields = {
+  kind: "homemade",
+  name: "",
+  price: "",
+  player: "",
+  team: "",
+  sport: "",
+  cardSet: "",
+  year: "",
+  cardNumber: "",
+  manufacturer: "",
+  condition: "",
+  notes: "",
+};
+
+const SPORTS = ["Baseball", "Basketball", "Football", "Hockey", "Soccer", "Racing", "Other"];
 
 function Submit({ hasPhoto }: { hasPhoto: boolean }) {
   const { pending } = useFormStatus();
@@ -11,12 +44,12 @@ function Submit({ hasPhoto }: { hasPhoto: boolean }) {
     <button
       type="submit"
       disabled={!enabled}
-      className={`rounded-full px-7 text-[18px] font-semibold transition-colors ${
+      className={`rounded-full px-7 text-[17px] font-semibold transition-colors ${
         enabled
           ? "bg-[var(--accent)] text-[var(--accent-ink)]"
           : "hairline cursor-not-allowed bg-[var(--paper)] text-[var(--ink-muted)]"
       }`}
-      style={{ minHeight: 56 }}
+      style={{ minHeight: 54 }}
     >
       {pending ? "Adding…" : "Put it in the shop"}
     </button>
@@ -37,18 +70,21 @@ export default function AddCard({
   const [blob, setBlob] = useState<Blob | null>(null);
   const [busy, setBusy] = useState(false);
   const [reading, setReading] = useState(false);
-  const [filled, setFilled] = useState(false);
+  const [filled, setFilled] = useState<string[]>([]);
   const [localError, setLocalError] = useState<string | null>(null);
 
   // Controlled so a suggestion can populate them; the shopkeeper can overwrite.
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
+  const [f, setF] = useState<Fields>(EMPTY);
+  const set = <K extends keyof Fields>(key: K, value: Fields[K]) => {
+    setF((prev) => ({ ...prev, [key]: value }));
+    setFilled((prev) => prev.filter((k) => k !== key));
+  };
 
   async function pick(file: File | undefined) {
     if (!file) return;
     setBusy(true);
     setLocalError(null);
-    setFilled(false);
+    setFilled([]);
     try {
       const prepared = await preparePhoto(file);
       setBlob(prepared.blob);
@@ -70,17 +106,33 @@ export default function AddCard({
       body.set("photo", photo, "card.jpg");
       const { suggestion, error } = await suggest(body);
       if (error) setLocalError(error);
-      if (suggestion) {
-        // Only fill blanks — never overwrite something already typed.
-        setName((n) => n || suggestion.name);
-        setPrice((p) => p || suggestion.price);
-        if (suggestion.name) setFilled(true);
-      }
+      if (suggestion) applySuggestion(suggestion);
     } catch {
       // Suggestion is a convenience; failing it is not worth surfacing.
     } finally {
       setReading(false);
     }
+  }
+
+  /** Fills only what is still blank — never overwrites something already typed. */
+  function applySuggestion(s: NonNullable<Suggestion>) {
+    const touched: string[] = [];
+    setF((prev) => {
+      const next = { ...prev };
+      for (const key of Object.keys(EMPTY) as (keyof Fields)[]) {
+        if (key === "kind" || key === "notes") continue;
+        const value = s[key as keyof typeof s];
+        if (!prev[key] && typeof value === "string" && value.trim()) {
+          next[key] = value.trim();
+          touched.push(key);
+        }
+      }
+      // The kind is a classification, not a blank to fill, so it always follows
+      // the photo — but only until the shopkeeper picks one herself.
+      if (!prev.player && !prev.cardSet && s.kind) next.kind = s.kind;
+      return next;
+    });
+    setFilled(touched);
   }
 
   function submit(form: FormData) {
@@ -89,15 +141,13 @@ export default function AddCard({
     formAction(form);
     setPreview(null);
     setBlob(null);
-    setName("");
-    setPrice("");
-    setFilled(false);
+    setF(EMPTY);
+    setFilled([]);
     if (fileRef.current) fileRef.current.value = "";
   }
 
   const error = localError ?? state.error;
-  const field =
-    "hairline mt-2 w-full rounded-xl bg-[var(--paper)] px-4 text-[19px] font-medium normal-case tracking-normal text-[var(--ink)]";
+  const sports = f.kind === "sports";
 
   return (
     <form
@@ -110,8 +160,8 @@ export default function AddCard({
       </h2>
       <p className="mt-1 text-[15px] text-[var(--ink-muted)]">
         {suggest
-          ? "Take a photo and the name fills itself in."
-          : "Take a photo of the card you want to sell."}
+          ? "Photograph the card and the listing fills itself in."
+          : "Photograph the card you want to sell."}
       </p>
 
       {/* capture="environment" opens the back camera straight away on a phone. */}
@@ -125,8 +175,8 @@ export default function AddCard({
         onChange={(e) => pick(e.target.files?.[0])}
       />
 
-      <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-start">
-        <div className="sm:w-[220px] sm:shrink-0">
+      <div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-start">
+        <div className="sm:w-[230px] sm:shrink-0">
           {preview ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -160,53 +210,178 @@ export default function AddCard({
               {busy ? "Opening…" : "Take a photo"}
             </button>
           )}
+
+          {reading && (
+            <p className="mt-3 text-[14px] font-medium text-[var(--accent)]" role="status">
+              Reading the card…
+            </p>
+          )}
+          {!reading && filled.length > 0 && (
+            <p className="mt-3 text-[14px] text-[var(--ink-muted)]" role="status">
+              Filled in {filled.length} {filled.length === 1 ? "field" : "fields"} for you. Check
+              them before publishing.
+            </p>
+          )}
         </div>
 
-        <div className="flex-1">
-          <label className="block text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--ink-muted)]">
-            <span className="flex items-baseline gap-2">
-              Name
-              {reading && <span className="normal-case tracking-normal">reading the card…</span>}
-              {filled && !reading && (
-                <span className="normal-case tracking-normal text-[var(--accent)]">
-                  filled in for you
-                </span>
-              )}
-            </span>
-            <input
+        <div className="min-w-0 flex-1">
+          <fieldset>
+            <legend className="label mb-2">What kind of card</legend>
+            <div className="flex gap-2">
+              {(
+                [
+                  ["homemade", "Handmade"],
+                  ["sports", "Sports card"],
+                ] as const
+              ).map(([value, label]) => (
+                <label
+                  key={value}
+                  className={`cursor-pointer rounded-full px-5 py-2.5 text-[15px] font-semibold transition-colors ${
+                    f.kind === value
+                      ? "bg-[var(--ink)] text-[var(--paper)]"
+                      : "hairline bg-[var(--paper)] text-[var(--ink-muted)]"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="kind"
+                    value={value}
+                    checked={f.kind === value}
+                    onChange={() => set("kind", value)}
+                    className="sr-only"
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <Field
+              label={sports ? "Listing name" : "Name"}
               name="name"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setFilled(false);
-              }}
-              placeholder={reading ? "…" : "Rainbow card"}
-              className={field}
-              style={{ minHeight: 56 }}
+              value={f.name}
+              onChange={(v) => set("name", v)}
+              placeholder={sports ? "Ken Griffey Jr." : "Rainbow unicorn"}
+              highlight={filled.includes("name")}
             />
-          </label>
-
-          <label className="mt-4 block text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--ink-muted)]">
-            Price
-            <input
+            <Field
+              label="Price"
               name="price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              inputMode="decimal"
+              value={f.price}
+              onChange={(v) => set("price", v)}
               placeholder="50c"
-              className={field}
-              style={{ minHeight: 56 }}
+              inputMode="decimal"
+              highlight={filled.includes("price")}
+            />
+          </div>
+
+          {sports && (
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <Field
+                label="Player"
+                name="player"
+                value={f.player}
+                onChange={(v) => set("player", v)}
+                placeholder="Ken Griffey Jr."
+                highlight={filled.includes("player")}
+              />
+              <Field
+                label="Team"
+                name="team"
+                value={f.team}
+                onChange={(v) => set("team", v)}
+                placeholder="Seattle Mariners"
+                highlight={filled.includes("team")}
+              />
+
+              <label className="block">
+                <span className="label">Sport</span>
+                <select
+                  name="sport"
+                  value={f.sport}
+                  onChange={(e) => set("sport", e.target.value)}
+                  className={`field mt-2 ${filled.includes("sport") ? "ring-1 ring-[var(--accent)]" : ""}`}
+                >
+                  <option value="">Not sure</option>
+                  {/* A sport the model read that is not on the list is still valid. */}
+                  {f.sport && !SPORTS.includes(f.sport) && <option value={f.sport}>{f.sport}</option>}
+                  {SPORTS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <Field
+                label="Set"
+                name="cardSet"
+                value={f.cardSet}
+                onChange={(v) => set("cardSet", v)}
+                placeholder="Upper Deck Series 1"
+                highlight={filled.includes("cardSet")}
+              />
+              <Field
+                label="Year"
+                name="year"
+                value={f.year}
+                onChange={(v) => set("year", v)}
+                placeholder="1989"
+                inputMode="numeric"
+                highlight={filled.includes("year")}
+              />
+              <Field
+                label="Card number"
+                name="cardNumber"
+                value={f.cardNumber}
+                onChange={(v) => set("cardNumber", v)}
+                placeholder="1"
+                inputMode="numeric"
+                highlight={filled.includes("cardNumber")}
+              />
+              <Field
+                label="Maker"
+                name="manufacturer"
+                value={f.manufacturer}
+                onChange={(v) => set("manufacturer", v)}
+                placeholder="Upper Deck"
+                highlight={filled.includes("manufacturer")}
+              />
+              <Field
+                label="Condition"
+                name="condition"
+                value={f.condition}
+                onChange={(v) => set("condition", v)}
+                placeholder="Near mint, or PSA 9"
+                highlight={filled.includes("condition")}
+              />
+            </div>
+          )}
+
+          <label className="mt-5 block">
+            <span className="label">Anything to say about it</span>
+            <textarea
+              name="notes"
+              value={f.notes}
+              onChange={(e) => set("notes", e.target.value)}
+              rows={2}
+              placeholder={
+                sports ? "Corners are sharp. Kept in a sleeve." : "Lina drew this one on a Sunday."
+              }
+              className="field mt-2 resize-y py-3"
+              style={{ minHeight: 72 }}
             />
           </label>
 
-          <div className="mt-5 flex flex-wrap gap-3">
+          <div className="mt-6 flex flex-wrap gap-3">
             <Submit hasPhoto={Boolean(blob)} />
             {preview && (
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="hairline rounded-full bg-[var(--paper)] px-7 text-[18px] font-semibold"
-                style={{ minHeight: 56 }}
+                className="hairline rounded-full bg-[var(--paper)] px-7 text-[17px] font-semibold"
+                style={{ minHeight: 54 }}
               >
                 Retake
               </button>
@@ -226,5 +401,40 @@ export default function AddCard({
         </div>
       </div>
     </form>
+  );
+}
+
+function Field({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  inputMode,
+  highlight,
+}: {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  inputMode?: "decimal" | "numeric";
+  highlight?: boolean;
+}) {
+  return (
+    <label className="block">
+      <span className="label">{label}</span>
+      <input
+        name={name}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        inputMode={inputMode}
+        autoComplete="off"
+        // A ring, not a fill: it marks what the photo suggested without making
+        // the field look disabled or already approved.
+        className={`field mt-2 ${highlight ? "ring-1 ring-[var(--accent)]" : ""}`}
+      />
+    </label>
   );
 }
