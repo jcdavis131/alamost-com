@@ -86,6 +86,30 @@ There is no migration step. The schema is created on first use and every stateme
 idempotent — including the `ALTER TABLE … ADD COLUMN IF NOT EXISTS` that carries an existing
 shop forward — so deploying is just a git push.
 
+### Opening the shop
+
+The code is deployed and the site is up before any of this — it just has nothing to sell yet.
+In order:
+
+1. **Attach Postgres.** Vercel → Storage → Neon → Free, or
+   `npx vercel@latest install neon --name alamost-db --plan free -e production -e preview`.
+   The integration sets `DATABASE_URL` for you. Confirm it is the *pooled* string.
+2. **Set `OWNER_EMAIL` and `OWNER_PASSWORD`** in the project's environment variables. Without
+   both, no owner is seeded and nobody can sign in to add stock.
+3. **Redeploy.** An environment variable added after a deployment is not picked up by that
+   deployment — the running one keeps the values it was built with. Redeploy from the Vercel
+   dashboard, or push any commit. This is the step most likely to make a correct setup look
+   broken.
+4. **Sign in at `/login`**, then change the password at `/account`. The seeded password has been
+   sitting in an environment variable, so treat it as a bootstrap credential, not a real one.
+
+The storefront tells you which stage you are at: "Not open yet" means no `DATABASE_URL`; "The
+shelves are ready" means the database is attached and the shop simply has no cards in it.
+
+`BLOB_READ_WRITE_TOKEN` is only reached when a photo is uploaded, so a missing Blob store shows
+up as a failure on the first card you add rather than at startup. Add a card to prove it works
+before assuming it does.
+
 > **Why `vercel.json` pins `outputDirectory`:** the Vercel project still has an Output Directory
 > of `out`, left over from when this was a static export, and that setting applies to a build
 > which now emits `.next`. Setting `outputDirectory` to `.next` in `vercel.json` overrides it from
