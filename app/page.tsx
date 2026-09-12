@@ -98,6 +98,10 @@ const faqs = [
     "What won't you take on?",
     "Theater. If the honest answer is that you don't need AI for the problem, that's the answer you'll get — along with what would actually move the needle.",
   ],
+  [
+    "Do you provide financial or investment advice?",
+    "No. Alamo St Advisors is an AI strategy and technical advisory firm — we help teams design, evaluate, and ship AI systems. We don't provide financial, investment, legal, or tax advice, and nothing on this site should be read that way. (The name similarity to any investment adviser is coincidental; we're not affiliated with any registered investment adviser.)",
+  ],
 ];
 
 function Header() {
@@ -350,6 +354,9 @@ function Footer() {
         <div>
           <p className="font-display font-bold text-[var(--ink)]">Alamo St Advisors</p>
           <p className="mt-2">© 2026 Alamo St Advisors · Austin, Texas</p>
+          <p className="mt-2 max-w-md text-xs leading-relaxed">
+            AI strategy and technical advisory only — not financial, investment, legal, or tax advice.
+          </p>
         </div>
         <nav className="flex flex-wrap gap-x-6 gap-y-2">
           <a href="#services" className="transition-colors hover:text-[var(--ink)]">Services</a>
