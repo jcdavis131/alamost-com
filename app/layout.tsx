@@ -23,9 +23,35 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    name: "Alamo St Advisors",
+    url: "https://alamost.com",
+    description: DESCRIPTION,
+    areaServed: "Worldwide",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Austin",
+      addressRegion: "TX",
+      addressCountry: "US",
+    },
+    founder: {
+      "@type": "Person",
+      name: "JC Davis",
+      url: "https://jcamd.com",
+    },
+    sameAs: ["https://github.com/jcdavis131"],
+  };
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        {children}
+      </body>
     </html>
   );
 }
