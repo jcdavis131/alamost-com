@@ -2,23 +2,24 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 const DESCRIPTION =
-  "Sports trading cards and handmade cards, photographed at home and described properly. Run by Lina Davis, proprietor.";
+  "Alamo St Advisors — independent advisory for teams building with AI. Strategy, model evaluation, data pipelines, and embedding systems. Austin, Texas.";
 
 export const metadata: Metadata = {
-  // A template so every page carries the shop's name without each one
-  // remembering to append it.
-  title: { default: "Lina's Card Shop", template: "%s — Lina's Card Shop" },
+  title: {
+    default: "Alamo St Advisors — Advisory for teams building with AI",
+    template: "%s — Alamo St Advisors",
+  },
   description: DESCRIPTION,
   metadataBase: new URL("https://alamost.com"),
-  applicationName: "Lina's Card Shop",
+  applicationName: "Alamo St Advisors",
   openGraph: {
-    siteName: "Lina's Card Shop",
-    title: "Lina's Card Shop",
+    siteName: "Alamo St Advisors",
+    title: "Alamo St Advisors — Advisory for teams building with AI",
     description: DESCRIPTION,
     type: "website",
     url: "https://alamost.com",
   },
-  twitter: { card: "summary_large_image" },
+  twitter: { card: "summary" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

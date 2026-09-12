@@ -2,181 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
-/*
- * Warm paper, near-black ink, one terracotta accent for anything you can act
- * on. The three category colours below are for chips and marks only — never
- * for a second call to action, because two accents means neither is one.
- *
- * Every colour here clears 4.5:1 as text on paper, so a chip can carry a word
- * without a tint behind it doing the work.
- */
 :root {
-  --paper: #fcfbf9;
-  --paper-raised: #ffffff;
-  --paper-sunk: #f6f3ed;
-  --ink: #14130e;
-  --ink-muted: #6e6a5f;
-  --line: #e5e1d8;
-
-  --accent: #b4472b;       /* terracotta — 5.4:1 on paper, 5.4:1 as white-on-solid */
-  --accent-ink: #ffffff;
-  --accent-soft: #fbeee9;
-
-  --made: #9a3f6b;         /* homemade — 6.2:1 */
-  --made-soft: #f9edf3;
-  --sport: #1f5f6b;        /* sports — 7.1:1 */
-  --sport-soft: #e7f2f3;
-  --gold: #8a6a10;         /* sold, and anything rare — 5.0:1 */
-  --gold-soft: #f7f0dd;
+  --paper: #faf7f1;
+  --paper-deep: #f2ecdf;
+  --ink: #221d15;
+  --muted: #6f6455;
+  --line: #e3d9c6;
+  --accent: #b25e38;
+  --accent-deep: #8c4527;
+  --dark: #1c1813;
+  --dark-paper: #f4eee1;
 }
 
-html,
-body {
-  height: 100%;
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
     "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-a {
-  color: inherit;
+.font-display {
+  font-family: Georgia, "Iowan Old Style", "Times New Roman", Times, serif;
+  letter-spacing: -0.01em;
 }
 
-:where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-  border-radius: 4px;
+::selection {
+  background: var(--accent);
+  color: #fff;
 }
 
-/*
- * The shop's own classes live in the components layer so a Tailwind utility
- * still overrides them at the call site — `.field w-auto` has to actually be
- * auto-width, and `.field pl-11` has to actually clear the search icon.
- */
-@layer components {
-  /* Display face for the wordmark — the one place a serif earns its keep. */
-  .display {
-    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
-    font-weight: 600;
-    letter-spacing: -0.015em;
-  }
-
-  /* The proprietor's byline, and every other small-caps label in the shop. */
-  .label {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--ink-muted);
-  }
-
-  /* Hairline that stays 1 device pixel on retina rather than blooming to 2. */
-  .hairline {
-    border: 1px solid var(--line);
-  }
-
-  /*
-   * A card in its sleeve: the generative foil sits behind, the photograph floats
-   * on it. The inset shadow is what sells the depth — without it the photo reads
-   * as pasted on rather than seated in.
-   */
-  .sleeve {
-    position: relative;
-    overflow: hidden;
-    border-radius: 14px;
-    border: 1px solid var(--line);
-    background: var(--paper-raised);
-  }
-
-  .foil {
-    position: absolute;
-    inset: 0;
-  }
-
-  .foil > svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  .sleeve-photo {
-    position: relative;
-    border-radius: 7px;
-    overflow: hidden;
-    box-shadow:
-      0 1px 2px rgb(20 19 14 / 0.14),
-      0 8px 18px -8px rgb(20 19 14 / 0.3);
-  }
-
-  /* Chips carry a category in one word. Tint plus its own ink, never ink alone. */
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border-radius: 999px;
-    padding: 3px 10px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  .chip-made {
-    background: var(--made-soft);
-    color: var(--made);
-  }
-
-  .chip-sport {
-    background: var(--sport-soft);
-    color: var(--sport);
-  }
-
-  .chip-sold {
-    background: var(--gold-soft);
-    color: var(--gold);
-  }
-
-  /* Native controls, wearing the shop's paper instead of the platform's. */
-  .field {
-    width: 100%;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: var(--paper-raised);
-    color: var(--ink);
-    padding: 0 14px;
-    min-height: 48px;
-    font-size: 16px; /* under 16px iOS zooms the whole page on focus */
-    font-weight: 500;
-  }
-
-  select.field {
-    appearance: none;
-    padding-right: 34px;
-    background-image: linear-gradient(45deg, transparent 50%, var(--ink-muted) 50%),
-      linear-gradient(135deg, var(--ink-muted) 50%, transparent 50%);
-    background-position:
-      calc(100% - 18px) calc(50% + 2px),
-      calc(100% - 13px) calc(50% + 2px);
-    background-size: 5px 5px, 5px 5px;
-    background-repeat: no-repeat;
-  }
+/* thin elegant rules */
+.rule {
+  border-top: 1px solid var(--line);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+/* subtle warm wash for the hero */
+.hero-grain {
+  background-image: radial-gradient(
+      ellipse 80% 60% at 50% -10%,
+      rgba(178, 94, 56, 0.08),
+      transparent
+    ),
+    radial-gradient(ellipse 60% 50% at 90% 110%, rgba(178, 94, 56, 0.05), transparent);
+}
+
+/* card hover lift */
+.lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px -22px rgba(34, 29, 21, 0.35);
+}
+
+/* numbered step marker */
+.step-num {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  color: var(--accent);
 }
