@@ -46,6 +46,60 @@ const principles = [
   ["No theater", "If the answer is 'you don't need AI for this,' that's the answer you'll get."],
 ];
 
+const work = [
+  {
+    title: "Embedding-map games",
+    body: "Vector Hoops: a basketball strategy game played on a live 3D embedding map of 12,966 player-seasons — daily guessing games, pack battles, and a twenty-questions mode, all served from one champion model.",
+    href: "https://hoops.dumbmodel.com",
+    label: "Play it live",
+  },
+  {
+    title: "Embedding Atlas",
+    body: "One 3D map, many layers — aircraft, ships, satellites, earthquakes, launches, plus jobs and wages across 393 US metros on real labor data. Switchable, combinable layers over live feeds.",
+    href: "https://eye.jcamd.com",
+    label: "Live view",
+  },
+  {
+    title: "Forecasting models",
+    body: "Multivariate time-series forecasting with modern foundation models — trained, held-out evaluated, and shipped behind live product features, never demo-ware.",
+    href: "https://github.com/jcdavis131/vector-hoops",
+    label: "Repository",
+  },
+  {
+    title: "Data pipelines",
+    body: "Production-grade ingestion and quality gates over real sources at full scale — labor statistics, sports data, research papers — with honest failure modes at every step.",
+    href: "https://github.com/jcdavis131",
+    label: "GitHub",
+  },
+];
+
+const faqs = [
+  [
+    "How do engagements start?",
+    "With a conversation about the decision you're stuck on. If there's a fit, the first step is a focused diagnosis — your data, your models, your team — and a plain-spoken read on what to do first.",
+  ],
+  [
+    "How long do engagements run?",
+    "Weeks, not quarters. Each phase ends with something working on your data: a prototype your team can touch and measure, then a clean handoff.",
+  ],
+  [
+    "What does it cost?",
+    "Fixed scope, agreed upfront. You know exactly what you're getting and what it costs before anything starts — no hourly billing theater.",
+  ],
+  [
+    "Who does the work?",
+    "The principal, directly. No bench, no handoffs, no juniors learning on your budget. Engagements are deliberately limited to a few teams at a time.",
+  ],
+  [
+    "Do you write production code?",
+    "Yes — working slices on real data, not slideware. Then documentation and training so your team owns it after the handoff.",
+  ],
+  [
+    "What won't you take on?",
+    "Theater. If the honest answer is that you don't need AI for the problem, that's the answer you'll get — along with what would actually move the needle.",
+  ],
+];
+
 function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--paper)]/90 backdrop-blur">
@@ -57,8 +111,10 @@ function Header() {
         </a>
         <nav className="hidden items-center gap-7 text-sm text-[var(--muted)] sm:flex">
           <a href="#services" className="transition-colors hover:text-[var(--ink)]">Services</a>
+          <a href="#work" className="transition-colors hover:text-[var(--ink)]">Work</a>
           <a href="#approach" className="transition-colors hover:text-[var(--ink)]">Approach</a>
           <a href="#about" className="transition-colors hover:text-[var(--ink)]">About</a>
+          <a href="#faq" className="transition-colors hover:text-[var(--ink)]">FAQ</a>
         </nav>
         <a
           href="#contact"
@@ -161,6 +217,71 @@ function Approach() {
   );
 }
 
+function Work() {
+  return (
+    <section id="work" className="rule">
+      <div className="mx-auto max-w-5xl px-6 py-20 sm:py-24">
+        <p className="step-num mb-4">SELECTED WORK</p>
+        <h2 className="font-display max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+          Shipped systems, not slideware.
+        </h2>
+        <p className="mt-5 max-w-2xl leading-relaxed text-[var(--muted)]">
+          A sample of production systems built and run by the principal — the
+          same discipline advisory engagements get.
+        </p>
+        <div className="mt-12 grid gap-6 sm:grid-cols-2">
+          {work.map((w) => (
+            <div
+              key={w.title}
+              className="lift flex flex-col rounded-2xl border border-[var(--line)] bg-white/60 p-8"
+            >
+              <h3 className="font-display text-xl font-bold">{w.title}</h3>
+              <p className="mt-3 flex-1 leading-relaxed text-[var(--muted)]">{w.body}</p>
+              <a
+                href={w.href}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 text-sm font-semibold text-[var(--accent-deep)] hover:underline"
+              >
+                {w.label} →
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Faq() {
+  return (
+    <section id="faq" className="rule">
+      <div className="mx-auto max-w-3xl px-6 py-20 sm:py-24">
+        <p className="step-num mb-4">FAQ</p>
+        <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          Fair questions.
+        </h2>
+        <div className="mt-10 space-y-4">
+          {faqs.map(([q, a]) => (
+            <details
+              key={q}
+              className="group rounded-2xl border border-[var(--line)] bg-white/60 px-6 py-5"
+            >
+              <summary className="cursor-pointer list-none font-semibold marker:hidden [&::-webkit-details-marker]:hidden">
+                <span className="flex items-center justify-between gap-4">
+                  {q}
+                  <span className="text-[var(--accent)] transition-transform group-open:rotate-45">+</span>
+                </span>
+              </summary>
+              <p className="mt-3 leading-relaxed text-[var(--muted)]">{a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function About() {
   return (
     <section id="about" className="rule">
@@ -225,9 +346,19 @@ function Contact() {
 function Footer() {
   return (
     <footer className="border-t border-[var(--line)]">
-      <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-3 px-6 py-8 text-sm text-[var(--muted)] sm:flex-row sm:items-center">
-        <span className="font-display font-bold text-[var(--ink)]">Alamo St Advisors</span>
-        <span>© 2026 Alamo St Advisors · Austin, Texas</span>
+      <div className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-10 text-sm text-[var(--muted)] sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="font-display font-bold text-[var(--ink)]">Alamo St Advisors</p>
+          <p className="mt-2">© 2026 Alamo St Advisors · Austin, Texas</p>
+        </div>
+        <nav className="flex flex-wrap gap-x-6 gap-y-2">
+          <a href="#services" className="transition-colors hover:text-[var(--ink)]">Services</a>
+          <a href="#work" className="transition-colors hover:text-[var(--ink)]">Work</a>
+          <a href="#approach" className="transition-colors hover:text-[var(--ink)]">Approach</a>
+          <a href="#about" className="transition-colors hover:text-[var(--ink)]">About</a>
+          <a href="#faq" className="transition-colors hover:text-[var(--ink)]">FAQ</a>
+          <a href="#contact" className="transition-colors hover:text-[var(--ink)]">Contact</a>
+        </nav>
       </div>
     </footer>
   );
@@ -240,8 +371,10 @@ export default function FirmPage() {
       <main>
         <Hero />
         <Services />
+        <Work />
         <Approach />
         <About />
+        <Faq />
         <Contact />
       </main>
       <Footer />
