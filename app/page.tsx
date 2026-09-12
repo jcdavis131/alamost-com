@@ -175,7 +175,7 @@ function About() {
           <div className="space-y-5 leading-relaxed text-[var(--muted)] sm:col-span-3">
             <p>
               Alamo St Advisors is led by{" "}
-              <span className="font-semibold text-[var(--ink)]">Cam Davis</span>,
+              <span className="font-semibold text-[var(--ink)]">JC Davis</span>,
               an independent advisor in Austin, Texas who builds and ships AI
               product systems — embedding-map games, forecasting models, and
               data pipelines that run on real data at full scale.
