@@ -1,5 +1,3 @@
-const CONTACT_EMAIL = "hello@alamost.com";
-
 const services = [
   {
     n: "01",
@@ -207,14 +205,16 @@ function Contact() {
         </h2>
         <p className="mx-auto mt-5 max-w-xl leading-relaxed text-[var(--muted)]">
           A short note about your team, your data, and the decision you're
-          stuck on is the best way to start. Expect a direct reply — you'll
+          stuck on is the best way to start. Reach out on GitHub — you'll
           hear from the principal, not a sales team.
         </p>
         <a
-          href={`mailto:${CONTACT_EMAIL}?subject=Advisory%20inquiry`}
+          href="https://github.com/jcdavis131"
+          target="_blank"
+          rel="noreferrer"
           className="mt-10 inline-block rounded-full bg-[var(--ink)] px-9 py-4 text-base font-semibold text-[var(--paper)] transition-colors hover:bg-[var(--accent-deep)]"
         >
-          {CONTACT_EMAIL}
+          github.com/jcdavis131
         </a>
         <p className="mt-6 text-sm text-[var(--muted)]">Austin, Texas</p>
       </div>
