@@ -1,23 +1,18 @@
 const services = [
   {
     n: "01",
-    title: "AI strategy & roadmapping",
-    body: "Where models actually earn their keep in your product — and where they don't. Build vs. buy, sequencing, and what to measure, decided before anyone trains anything.",
+    title: "Needs assessments",
+    body: "A clear-eyed look at where machine learning or agentic systems can actually move one of your business metrics — and where they can't. You get an honest map of the opportunities, the data they'd need, and what it costs to be wrong, before anyone commits to building anything.",
   },
   {
     n: "02",
-    title: "Model evaluation",
-    body: "Held-out evals with real discipline: champion vs. challenger, honest metrics, no vanity leaderboards. Know what your model does before your customers find out.",
+    title: "Benchmarking workflows that matter",
+    body: "Evaluation harnesses built on your own data: champion vs. challenger, held-out metrics, human-in-the-loop checks — tied to business outcomes, not leaderboard scores. Know what a model or an agent will do for your customers before it ever touches them.",
   },
   {
     n: "03",
-    title: "Data pipelines",
-    body: "Production-grade pipelines with quality gates at every step. Real sources, full scale, honest failure modes — the unglamorous work that decides whether the model matters.",
-  },
-  {
-    n: "04",
-    title: "Embedding & search systems",
-    body: "Vector search, embedding maps, and product surfaces people can actually understand. From representation geometry to the interface that sits on top of it.",
+    title: "Building custom solutions",
+    body: "Working prototypes on your real data — embedding and search systems, forecasting models, production data pipelines with quality gates, agentic workflows with human approval gates. Built to hand off: documentation and training so your team owns it.",
   },
 ];
 
@@ -25,7 +20,7 @@ const steps = [
   {
     n: "I",
     title: "Diagnose",
-    body: "A focused look at your data, your models, and your team. You get a plain-spoken read: what's working, what's theater, and what to do first.",
+    body: "A needs assessment on your data, your models, and your team. You get a plain-spoken read: what's working, what's theater, and what to do first.",
   },
   {
     n: "II",
@@ -140,9 +135,10 @@ function Hero() {
           Clarity for teams building with&nbsp;AI.
         </h1>
         <p className="mt-7 max-w-2xl text-lg leading-relaxed text-[var(--muted)]">
-          Alamo St Advisors helps product and data teams decide where AI creates
-          real leverage — then build it right. Strategy grounded in shipped
-          systems, evaluation you can trust, and prototypes on real data.
+          Alamo St Advisors helps product and data teams understand where machine
+          learning and agentic systems create real leverage — then build them
+          right. Strategy grounded in shipped systems, evaluation you can trust,
+          and prototypes on real data.
         </p>
         <div className="mt-10 flex flex-wrap gap-4">
           <a
@@ -169,7 +165,7 @@ function Services() {
       <div className="mx-auto max-w-5xl px-6 py-20 sm:py-24">
         <p className="step-num mb-4">SERVICES</p>
         <h2 className="font-display max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
-          Four ways to get sharper.
+          Three ways to get sharper.
         </h2>
         <div className="mt-12 grid gap-6 sm:grid-cols-2">
           {services.map((s) => (
@@ -300,8 +296,9 @@ function About() {
               Alamo St Advisors is led by{" "}
               <span className="font-semibold text-[var(--ink)]">JC Davis</span>,
               an independent advisor in Austin, Texas who builds and ships AI
-              product systems — embedding-map games, forecasting models, and
-              data pipelines that run on real data at full scale.
+              product systems — embedding-map games, forecasting models,
+              agentic systems, and data pipelines that run on real data at
+              full scale.
             </p>
             <p>
               The work is the credential: production machine-learning systems,
