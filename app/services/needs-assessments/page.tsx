@@ -31,11 +31,11 @@ export default function NeedsAssessmentsPage() {
     provider: {
       "@type": "ProfessionalService",
       name: "Alamo St Advisors",
-      url: "https://alamost.com",
+      url: "https://www.alamost.com",
       address: { "@type": "PostalAddress", addressLocality: "Austin", addressRegion: "TX", addressCountry: "US" },
     },
     areaServed: "Worldwide",
-    url: "https://alamost.com/services/needs-assessments",
+    url: "https://www.alamost.com/services/needs-assessments",
     description: metadata.description,
   };
   return (

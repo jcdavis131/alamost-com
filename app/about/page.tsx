@@ -42,14 +42,14 @@ export default function AboutPage() {
     name: "JC Davis",
     jobTitle: "Independent AI strategy and technical advisor",
     description: metadata.description,
-    url: "https://alamost.com/about",
+    url: "https://www.alamost.com/about",
     homeLocation: {
       "@type": "Place",
       name: "Austin, Texas",
       address: { "@type": "PostalAddress", addressLocality: "Austin", addressRegion: "TX", addressCountry: "US" },
     },
     sameAs: ["https://github.com/jcdavis131", "https://jcamd.com"],
-    worksFor: { "@type": "ProfessionalService", name: "Alamo St Advisors", url: "https://alamost.com" },
+    worksFor: { "@type": "ProfessionalService", name: "Alamo St Advisors", url: "https://www.alamost.com" },
   };
   return (
     <div>

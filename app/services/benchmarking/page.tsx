@@ -31,11 +31,11 @@ export default function BenchmarkingPage() {
     provider: {
       "@type": "ProfessionalService",
       name: "Alamo St Advisors",
-      url: "https://alamost.com",
+      url: "https://www.alamost.com",
       address: { "@type": "PostalAddress", addressLocality: "Austin", addressRegion: "TX", addressCountry: "US" },
     },
     areaServed: "Worldwide",
-    url: "https://alamost.com/services/benchmarking",
+    url: "https://www.alamost.com/services/benchmarking",
     description: metadata.description,
   };
   return (
