@@ -94,6 +94,26 @@ const faqs = [
     "Theater. If the honest answer is that you don't need AI for the problem, that's the answer you'll get — along with what would actually move the needle.",
   ],
   [
+    "Where are you based, and do you work remotely?",
+    "Austin, Texas — and yes, engagements run remotely with clients anywhere. Working on your real data doesn't require a plane ticket, and the deliverables are written to be read and argued with asynchronously.",
+  ],
+  [
+    "Will you sign an NDA?",
+    "Yes. A mutual NDA is standard before any detailed data access, and I'm happy to start under yours. The first conversation about your decision doesn't need one — keep it at the level you're comfortable with.",
+  ],
+  [
+    "How do you handle our data?",
+    "Carefully, and in your systems whenever possible. Your data stays in client-provided systems with the least access needed; any local copies are minimized and deleted within 30 days of the engagement ending. It's never used to train models or shared with third parties without your written consent, and it's never pasted into public AI tools under default training settings — where AI tooling touches your data, it runs under your tenant or an account with training disabled.",
+  ],
+  [
+    "How does fixed-scope pricing work?",
+    "The scope and the price are agreed in writing before anything starts — you know exactly what you're getting and what it costs. No hourly billing, no meter running, no change-order theater. If the scope genuinely changes midstream, we agree a new scope and a new price with the same clarity, before the extra work starts.",
+  ],
+  [
+    "What happens after the handoff?",
+    "Your team owns everything: working software, documentation, training, and evaluation playbooks they can rerun themselves. There's no default retainer and no quiet dependency. If you want a second phase or a standing review, that's a separate fixed-scope conversation — never an automatic renewal.",
+  ],
+  [
     "Do you provide financial or investment advice?",
     "No. Alamo St Advisors is an AI strategy and technical advisory firm — we help teams design, evaluate, and ship AI systems. We don't provide financial, investment, legal, or tax advice, and nothing on this site should be read that way. (The name similarity to any investment adviser is coincidental; we're not affiliated with any registered investment adviser.)",
   ],
