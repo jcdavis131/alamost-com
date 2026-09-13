@@ -32,11 +32,11 @@ export default function CustomSolutionsPage() {
     provider: {
       "@type": "ProfessionalService",
       name: "Alamo St Advisors",
-      url: "https://alamost.com",
+      url: "https://www.alamost.com",
       address: { "@type": "PostalAddress", addressLocality: "Austin", addressRegion: "TX", addressCountry: "US" },
     },
     areaServed: "Worldwide",
-    url: "https://alamost.com/services/custom-solutions",
+    url: "https://www.alamost.com/services/custom-solutions",
     description: metadata.description,
   };
   return (
