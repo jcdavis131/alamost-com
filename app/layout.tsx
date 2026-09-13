@@ -18,8 +18,21 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     type: "website",
     url: "https://alamost.com",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Alamo St Advisors — Clarity for teams building with AI",
+      },
+    ],
   },
-  twitter: { card: "summary" },
+  twitter: {
+    card: "summary_large_image",
+    title: "Alamo St Advisors — Advisory for teams building with AI",
+    description: DESCRIPTION,
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
