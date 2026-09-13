@@ -10,16 +10,29 @@ export const metadata: Metadata = {
     template: "%s — Alamo St Advisors",
   },
   description: DESCRIPTION,
-  metadataBase: new URL("https://alamost.com"),
+  metadataBase: new URL("https://www.alamost.com"),
   applicationName: "Alamo St Advisors",
   openGraph: {
     siteName: "Alamo St Advisors",
     title: "Alamo St Advisors — Advisory for teams building with AI",
     description: DESCRIPTION,
     type: "website",
-    url: "https://alamost.com",
+    url: "https://www.alamost.com",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Alamo St Advisors — Clarity for teams building with AI",
+      },
+    ],
   },
-  twitter: { card: "summary" },
+  twitter: {
+    card: "summary_large_image",
+    title: "Alamo St Advisors — Advisory for teams building with AI",
+    description: DESCRIPTION,
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -27,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
     name: "Alamo St Advisors",
-    url: "https://alamost.com",
+    url: "https://www.alamost.com",
     description: DESCRIPTION,
     areaServed: "Worldwide",
     address: {

@@ -1,3 +1,6 @@
+import Header from "@/app/components/header";
+import Footer from "@/app/components/footer";
+
 const services = [
   {
     n: "01",
@@ -122,33 +125,6 @@ const faqs = [
   ],
 ];
 
-function Header() {
-  return (
-    <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--paper)]/90 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-        <a href="#top" className="flex items-center gap-3">
-          <span className="font-display text-xl font-bold tracking-tight">
-            Alamo&nbsp;St&nbsp;Advisors
-          </span>
-        </a>
-        <nav className="hidden items-center gap-7 text-sm text-[var(--muted)] sm:flex">
-          <a href="#services" className="transition-colors hover:text-[var(--ink)]">Services</a>
-          <a href="#work" className="transition-colors hover:text-[var(--ink)]">Work</a>
-          <a href="#approach" className="transition-colors hover:text-[var(--ink)]">Approach</a>
-          <a href="#about" className="transition-colors hover:text-[var(--ink)]">About</a>
-          <a href="#faq" className="transition-colors hover:text-[var(--ink)]">FAQ</a>
-        </nav>
-        <a
-          href="#contact"
-          className="rounded-full bg-[var(--ink)] px-5 py-2.5 text-sm font-medium text-[var(--paper)] transition-colors hover:bg-[var(--accent-deep)]"
-        >
-          Start a conversation
-        </a>
-      </div>
-    </header>
-  );
-}
-
 function Hero() {
   return (
     <section className="hero-grain">
@@ -165,13 +141,13 @@ function Hero() {
         </p>
         <div className="mt-10 flex flex-wrap gap-4">
           <a
-            href="#contact"
+            href="/contact"
             className="rounded-full bg-[var(--accent)] px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--accent-deep)]"
           >
             Start a conversation
           </a>
           <a
-            href="#approach"
+            href="/#approach"
             className="rounded-full border border-[var(--line)] px-7 py-3.5 text-sm font-semibold transition-colors hover:border-[var(--ink)]"
           >
             How we work
@@ -370,30 +346,6 @@ function Contact() {
         <p className="mt-6 text-sm text-[var(--muted)]">Austin, Texas</p>
       </div>
     </section>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="border-t border-[var(--line)]">
-      <div className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-10 text-sm text-[var(--muted)] sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="font-display font-bold text-[var(--ink)]">Alamo St Advisors</p>
-          <p className="mt-2">© 2026 Alamo St Advisors · Austin, Texas</p>
-          <p className="mt-2 max-w-md text-xs leading-relaxed">
-            AI strategy and technical advisory only — not financial, investment, legal, or tax advice.
-          </p>
-        </div>
-        <nav className="flex flex-wrap gap-x-6 gap-y-2">
-          <a href="#services" className="transition-colors hover:text-[var(--ink)]">Services</a>
-          <a href="#work" className="transition-colors hover:text-[var(--ink)]">Work</a>
-          <a href="#approach" className="transition-colors hover:text-[var(--ink)]">Approach</a>
-          <a href="#about" className="transition-colors hover:text-[var(--ink)]">About</a>
-          <a href="#faq" className="transition-colors hover:text-[var(--ink)]">FAQ</a>
-          <a href="#contact" className="transition-colors hover:text-[var(--ink)]">Contact</a>
-        </nav>
-      </div>
-    </footer>
   );
 }
 
