@@ -2,16 +2,19 @@ const services = [
   {
     n: "01",
     title: "Needs assessments",
+    href: "/services/needs-assessments",
     body: "A clear-eyed look at where machine learning or agentic systems can actually move one of your business metrics — and where they can't. You get an honest map of the opportunities, the data they'd need, and what it costs to be wrong, before anyone commits to building anything.",
   },
   {
     n: "02",
     title: "Benchmarking workflows that matter",
+    href: "/services/benchmarking",
     body: "Evaluation harnesses built on your own data: champion vs. challenger, held-out metrics, human-in-the-loop checks — tied to business outcomes, not leaderboard scores. Know what a model or an agent will do for your customers before it ever touches them.",
   },
   {
     n: "03",
     title: "Building custom solutions",
+    href: "/services/custom-solutions",
     body: "Working prototypes on your real data — embedding and search systems, forecasting models, production data pipelines with quality gates, agentic workflows with human approval gates. Built to hand off: documentation and training so your team owns it.",
   },
 ];
@@ -176,6 +179,12 @@ function Services() {
               <p className="step-num">{s.n}</p>
               <h3 className="font-display mt-3 text-xl font-bold">{s.title}</h3>
               <p className="mt-3 leading-relaxed text-[var(--muted)]">{s.body}</p>
+              <a
+                href={s.href}
+                className="mt-5 inline-block text-sm font-semibold text-[var(--accent-deep)] hover:underline"
+              >
+                What it includes →
+              </a>
             </div>
           ))}
         </div>
