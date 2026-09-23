@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Header from "@/app/components/header";
 import Footer from "@/app/components/footer";
+import { Corridor } from "@/app/components/marks";
+import { Arrow, SectionHead } from "@/app/components/ui";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const services = [
   {
@@ -125,34 +132,57 @@ const faqs = [
   ],
 ];
 
+
+const disciplines = ["AI strategy", "Model evaluation", "Data pipelines", "Embedding & search"];
+
 function Hero() {
   return (
-    <section className="hero-grain">
-      <div className="mx-auto max-w-5xl px-6 pb-24 pt-20 sm:pt-28">
-        <p className="step-num mb-6">INDEPENDENT ADVISORY — AUSTIN, TEXAS</p>
-        <h1 className="font-display max-w-3xl text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl">
+    <section aria-labelledby="hero-title" className="relative">
+      <div className="frame flex min-h-[calc(100svh-4.5rem)] flex-col items-center justify-center pb-10 pt-10 text-center">
+        <Corridor className="w-[14rem] text-[var(--ink)] sm:w-[16rem]" />
+        <p className="seq label label-accent flanked flanked-wide mt-9 sm:mt-10" style={{ ["--d" as string]: 500 }}>
+          <span>
+            Independent advisory
+            <span className="hidden sm:inline"> · </span>
+            <br className="sm:hidden" />
+            Austin, Texas
+          </span>
+        </p>
+        <h1
+          id="hero-title"
+          className="seq display t-page mt-6 max-w-[14ch] sm:max-w-[16ch]"
+          style={{ ["--d" as string]: 650 }}
+        >
           Clarity for teams building with&nbsp;AI.
         </h1>
-        <p className="mt-7 max-w-2xl text-lg leading-relaxed text-[var(--muted)]">
-          Alamo St Advisors helps product and data teams understand where machine
-          learning and agentic systems create real leverage — then build them
-          right. Strategy grounded in shipped systems, evaluation you can trust,
-          and prototypes on real data.
+        <p className="seq lead mt-7 max-w-[var(--measure)] lg:max-w-[42rem]" style={{ ["--d" as string]: 800 }}>
+          Alamo St Advisors helps product and data teams understand where
+          machine learning and agentic systems create real leverage — then
+          build them right. Strategy grounded in shipped systems, evaluation
+          you can trust, and prototypes on real data.
         </p>
-        <div className="mt-10 flex flex-wrap gap-4">
-          <a
-            href="/contact"
-            className="rounded-full bg-[var(--accent)] px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--accent-deep)]"
-          >
-            Start a conversation
+        <div
+          className="seq mt-10 flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row"
+          style={{ ["--d" as string]: 950 }}
+        >
+          <a href="/contact" className="btn btn-primary">
+            Start a conversation <Arrow />
           </a>
-          <a
-            href="/#approach"
-            className="rounded-full border border-[var(--line)] px-7 py-3.5 text-sm font-semibold transition-colors hover:border-[var(--ink)]"
-          >
+          <a href="/#approach" className="btn btn-quiet">
             How we work
           </a>
         </div>
+        <ul
+          aria-label="Practice areas"
+          className="seq mt-14 grid w-full max-w-4xl grid-cols-2 gap-px border-y border-[var(--line)] bg-[var(--line)] sm:mt-12 sm:grid-cols-4"
+          style={{ ["--d" as string]: 1100 }}
+        >
+          {disciplines.map((d) => (
+            <li key={d} className="label bg-[var(--paper)] px-2 py-4">
+              {d}
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
@@ -160,63 +190,29 @@ function Hero() {
 
 function Services() {
   return (
-    <section id="services" className="rule">
-      <div className="mx-auto max-w-5xl px-6 py-20 sm:py-24">
-        <p className="step-num mb-4">SERVICES</p>
-        <h2 className="font-display max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
-          Three ways to get sharper.
-        </h2>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2">
+    <section id="services" className="section hair-t">
+      <div className="frame">
+        <SectionHead
+          label="Services"
+          title="Three ways to get sharper."
+          lede="Each engagement is fixed in scope and ends with something your team can use: a map, a verdict, or a working system."
+        />
+        <ol className="ruled reveal mt-16 sm:mt-20 lg:grid-cols-3">
           {services.map((s) => (
-            <div
-              key={s.n}
-              className="lift rounded-2xl border border-[var(--line)] bg-white/60 p-8"
-            >
-              <p className="step-num">{s.n}</p>
-              <h3 className="font-display mt-3 text-xl font-bold">{s.title}</h3>
-              <p className="mt-3 leading-relaxed text-[var(--muted)]">{s.body}</p>
-              <a
-                href={s.href}
-                className="mt-5 inline-block text-sm font-semibold text-[var(--accent-deep)] hover:underline"
-              >
-                What it includes →
-              </a>
-            </div>
+            <li key={s.n} className="cell flex flex-col px-1 py-10 sm:px-10 sm:py-12 lg:px-9">
+              <p className="num text-lg">{s.n}</p>
+              <h3 className="display t-item mt-5 lg:min-h-[2.4em]">
+                <a href={s.href} className="no-underline after:absolute after:inset-0 after:content-['']">
+                  {s.title}
+                </a>
+              </h3>
+              <p className="body mt-4 flex-1">{s.body}</p>
+              <p className="link mt-8" aria-hidden="true">
+                What it includes <Arrow />
+              </p>
+            </li>
           ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Approach() {
-  return (
-    <section id="approach" className="bg-[var(--dark)] text-[var(--dark-paper)]">
-      <div className="mx-auto max-w-5xl px-6 py-20 sm:py-24">
-        <p className="step-num mb-4">APPROACH</p>
-        <h2 className="font-display max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
-          Short engagements. Working software. Clean handoff.
-        </h2>
-        <div className="mt-12 grid gap-10 sm:grid-cols-3">
-          {steps.map((s) => (
-            <div key={s.n}>
-              <p className="step-num text-2xl">{s.n}</p>
-              <h3 className="font-display mt-3 text-xl font-bold">{s.title}</h3>
-              <p className="mt-3 leading-relaxed opacity-75">{s.body}</p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-16 grid gap-6 border-t border-white/15 pt-12 sm:grid-cols-2">
-          {principles.map(([t, b]) => (
-            <div key={t} className="flex gap-4">
-              <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" />
-              <div>
-                <p className="font-semibold">{t}</p>
-                <p className="mt-1 text-sm leading-relaxed opacity-70">{b}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        </ol>
       </div>
     </section>
   );
@@ -224,34 +220,108 @@ function Approach() {
 
 function Work() {
   return (
-    <section id="work" className="rule">
-      <div className="mx-auto max-w-5xl px-6 py-20 sm:py-24">
-        <p className="step-num mb-4">SELECTED WORK</p>
-        <h2 className="font-display max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
-          Shipped systems, not slideware.
-        </h2>
-        <p className="mt-5 max-w-2xl leading-relaxed text-[var(--muted)]">
-          A sample of production systems built and run by the principal — the
-          same discipline advisory engagements get.
-        </p>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2">
+    <section id="work" className="section hair-t">
+      <div className="frame">
+        <SectionHead
+          label="Selected work"
+          title="Shipped systems, not slideware."
+          lede="A sample of production systems built and run by the principal — the same discipline advisory engagements get."
+        />
+        <ul className="ruled reveal mt-16 sm:mt-20 md:grid-cols-2">
           {work.map((w) => (
-            <div
-              key={w.title}
-              className="lift flex flex-col rounded-2xl border border-[var(--line)] bg-white/60 p-8"
-            >
-              <h3 className="font-display text-xl font-bold">{w.title}</h3>
-              <p className="mt-3 flex-1 leading-relaxed text-[var(--muted)]">{w.body}</p>
-              <a
-                href={w.href}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-5 text-sm font-semibold text-[var(--accent-deep)] hover:underline"
-              >
-                {w.label} →
-              </a>
-            </div>
+            <li key={w.title} className="cell flex flex-col px-1 py-10 sm:px-10 sm:py-12">
+              <h3 className="display t-item">
+                <a
+                  href={w.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="no-underline after:absolute after:inset-0 after:content-['']"
+                >
+                  {w.title}
+                  <span className="sr-only"> (opens in a new tab)</span>
+                </a>
+              </h3>
+              <p className="body mt-4 flex-1">{w.body}</p>
+              <p className="link mt-8" aria-hidden="true">
+                {w.label} <Arrow external />
+              </p>
+            </li>
           ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+function Approach() {
+  return (
+    <section id="approach" className="band section">
+      <div className="frame">
+        <SectionHead label="Approach" title="Short engagements. Working software. Clean handoff." />
+        <ol className="reveal relative mt-16 grid gap-14 sm:mt-20 md:grid-cols-3 md:gap-10">
+          <span
+            aria-hidden="true"
+            className="absolute left-[16.66%] right-[16.66%] top-[0.6875rem] hidden h-px bg-[var(--line)] md:block"
+          />
+          {steps.map((s) => (
+            <li key={s.n} className="relative flex flex-col items-center text-center">
+              <span
+                aria-hidden="true"
+                className="block h-[1.375rem] w-[1.375rem] rounded-full border border-[var(--accent)] bg-[var(--band)] p-[5px]"
+              >
+                <span className="block h-full w-full rounded-full bg-[var(--accent)]" />
+              </span>
+              <p className="num mt-6 text-xl">{s.n}</p>
+              <h3 className="display t-item mt-3">{s.title}</h3>
+              <p className="body mt-4 max-w-[21rem]">{s.body}</p>
+            </li>
+          ))}
+        </ol>
+        <ul className="ruled reveal mt-20 sm:mt-24 sm:grid-cols-2 lg:grid-cols-4">
+          {principles.map(([t, b]) => (
+            <li key={t} className="px-1 py-8 sm:px-8">
+              <p className="label !text-[var(--ink)]">{t}</p>
+              <p className="body mt-3 text-[length:var(--step--1)] leading-relaxed">{b}</p>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-12 text-center">
+          <a href="/process" className="link">
+            The full process <Arrow />
+          </a>
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function About() {
+  return (
+    <section id="about" className="section">
+      <div className="frame">
+        <SectionHead label="About the principal" title="Built by someone who ships." />
+        <div className="reveal mx-auto mt-12 max-w-[var(--measure)] space-y-6 sm:mt-14">
+          <p className="display text-[length:var(--step-2)] leading-[1.45] text-[var(--ink)]">
+            Alamo St Advisors is led by JC Davis, an independent advisor in
+            Austin, Texas who builds and ships AI product systems —
+            embedding-map games, forecasting models, agentic systems, and data
+            pipelines that run on real data at full scale.
+          </p>
+          <p className="body">
+            The work is the credential: production machine-learning systems,
+            rigorous held-out evaluation, and products people actually use.
+            Advisory here means the same discipline, pointed at your hardest
+            decisions.
+          </p>
+          <p className="body">
+            Engagements are deliberately limited — a few teams at a time, senior
+            attention throughout.
+          </p>
+          <p className="pt-4 text-center">
+            <a href="/about" className="link">
+              More about the principal <Arrow />
+            </a>
+          </p>
         </div>
       </div>
     </section>
@@ -260,25 +330,17 @@ function Work() {
 
 function Faq() {
   return (
-    <section id="faq" className="rule">
-      <div className="mx-auto max-w-3xl px-6 py-20 sm:py-24">
-        <p className="step-num mb-4">FAQ</p>
-        <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-          Fair questions.
-        </h2>
-        <div className="mt-10 space-y-4">
+    <section id="faq" className="section hair-t">
+      <div className="frame">
+        <SectionHead label="Questions" title="Fair questions." />
+        <div className="faq reveal mx-auto mt-14 max-w-3xl border-t border-[var(--line)] sm:mt-16">
           {faqs.map(([q, a]) => (
-            <details
-              key={q}
-              className="group rounded-2xl border border-[var(--line)] bg-white/60 px-6 py-5"
-            >
-              <summary className="cursor-pointer list-none font-semibold marker:hidden [&::-webkit-details-marker]:hidden">
-                <span className="flex items-center justify-between gap-4">
-                  {q}
-                  <span className="text-[var(--accent)] transition-transform group-open:rotate-45">+</span>
-                </span>
+            <details key={q} className="border-b border-[var(--line)]">
+              <summary className="flex items-center justify-between gap-6 py-6">
+                <span className="q display text-[1.1875rem] leading-snug sm:text-[1.3125rem]">{q}</span>
+                <span className="plus" aria-hidden="true" />
               </summary>
-              <p className="mt-3 leading-relaxed text-[var(--muted)]">{a}</p>
+              <p className="body -mt-1 max-w-[var(--measure)] pb-7">{a}</p>
             </details>
           ))}
         </div>
@@ -287,63 +349,29 @@ function Faq() {
   );
 }
 
-function About() {
-  return (
-    <section id="about" className="rule">
-      <div className="mx-auto max-w-5xl px-6 py-20 sm:py-24">
-        <p className="step-num mb-4">ABOUT</p>
-        <div className="grid gap-10 sm:grid-cols-5">
-          <h2 className="font-display text-3xl font-bold tracking-tight sm:col-span-2 sm:text-4xl">
-            Built by someone who ships.
-          </h2>
-          <div className="space-y-5 leading-relaxed text-[var(--muted)] sm:col-span-3">
-            <p>
-              Alamo St Advisors is led by{" "}
-              <span className="font-semibold text-[var(--ink)]">JC Davis</span>,
-              an independent advisor in Austin, Texas who builds and ships AI
-              product systems — embedding-map games, forecasting models,
-              agentic systems, and data pipelines that run on real data at
-              full scale.
-            </p>
-            <p>
-              The work is the credential: production machine-learning systems,
-              rigorous held-out evaluation, and products people actually use.
-              Advisory here means the same discipline, pointed at your hardest
-              decisions.
-            </p>
-            <p>
-              Engagements are deliberately limited — a few teams at a time, senior
-              attention throughout.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function Contact() {
   return (
-    <section id="contact" className="hero-grain rule">
-      <div className="mx-auto max-w-5xl px-6 py-20 text-center sm:py-28">
-        <p className="step-num mb-4">CONTACT</p>
-        <h2 className="font-display mx-auto max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
-          Tell us what you're trying to build.
+    <section id="contact" className="section hair-t">
+      <div className="frame reveal flex flex-col items-center text-center">
+        <p className="label label-accent flanked">Contact</p>
+        <h2 className="display t-section mt-6 max-w-2xl">
+          Tell us what you&rsquo;re trying to build.
         </h2>
-        <p className="mx-auto mt-5 max-w-xl leading-relaxed text-[var(--muted)]">
-          A short note about your team, your data, and the decision you're
-          stuck on is the best way to start. Reach out on GitHub — you'll
+        <p className="lead mt-6 max-w-[var(--measure)]">
+          A short note about your team, your data, and the decision you&rsquo;re
+          stuck on is the best way to start. Reach out on GitHub — you&rsquo;ll
           hear from the principal, not a sales team.
         </p>
-        <a
-          href="https://github.com/jcdavis131"
-          target="_blank"
-          rel="noreferrer"
-          className="mt-10 inline-block rounded-full bg-[var(--ink)] px-9 py-4 text-base font-semibold text-[var(--paper)] transition-colors hover:bg-[var(--accent-deep)]"
-        >
-          github.com/jcdavis131
-        </a>
-        <p className="mt-6 text-sm text-[var(--muted)]">Austin, Texas</p>
+        <div className="mt-10 flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row">
+          <a href="https://github.com/jcdavis131" target="_blank" rel="noreferrer" className="btn btn-primary">
+            github.com/jcdavis131 <Arrow external />
+            <span className="sr-only">(opens in a new tab)</span>
+          </a>
+          <a href="/contact" className="btn btn-quiet">
+            What to include
+          </a>
+        </div>
+        <p className="label mt-8">Austin, Texas</p>
       </div>
     </section>
   );
@@ -353,7 +381,7 @@ export default function FirmPage() {
   return (
     <div id="top">
       <Header />
-      <main>
+      <main id="main">
         <Hero />
         <Services />
         <Work />

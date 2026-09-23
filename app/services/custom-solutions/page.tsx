@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Header from "@/app/components/header";
-import Footer from "@/app/components/footer";
+import ServicePage from "@/app/components/service-page";
 
 export const metadata: Metadata = {
   title: "Building custom solutions",
+  alternates: { canonical: "/services/custom-solutions" },
   description:
     "Working prototypes on your real data — embedding and search systems, forecasting models, production data pipelines with quality gates, agentic workflows with human approval gates. Built to hand off.",
 };
@@ -40,88 +40,15 @@ export default function CustomSolutionsPage() {
     description: metadata.description,
   };
   return (
-    <div>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <Header />
-      <main>
-        <section className="hero-grain">
-          <div className="mx-auto max-w-5xl px-6 pb-16 pt-16 sm:pt-20">
-            <p className="step-num mb-4"><a href="/#services" className="hover:underline">SERVICES</a> · 03</p>
-            <h1 className="font-display max-w-3xl text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
-              Building custom solutions
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[var(--muted)]">
-              Working prototypes on your real data — embedding and search
-              systems, forecasting models, production data pipelines with
-              quality gates, agentic workflows with human approval gates. Built
-              to hand off: documentation and training so your team owns it.
-            </p>
-          </div>
-        </section>
-
-        <section className="rule">
-          <div className="mx-auto max-w-5xl px-6 py-16 sm:py-20">
-            <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">What you get</h2>
-            <div className="mt-10 space-y-8">
-              {deliverables.map(([t, b]) => (
-                <div key={t} className="flex gap-5">
-                  <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" />
-                  <div>
-                    <p className="font-semibold">{t}</p>
-                    <p className="mt-1 max-w-3xl leading-relaxed text-[var(--muted)]">{b}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="rule">
-          <div className="mx-auto grid max-w-5xl gap-10 px-6 py-16 sm:grid-cols-2 sm:py-20">
-            <div>
-              <h2 className="font-display text-2xl font-bold tracking-tight">How it runs</h2>
-              <p className="mt-4 leading-relaxed text-[var(--muted)]">
-                Weeks, not quarters. The shape is always the same: diagnose the
-                decision, build a working slice on real data, evaluate it
-                honestly, then hand it over with your team trained to run it.
-                Engagements are scoped to a single working system with a fixed
-                price agreed upfront — you&apos;ll know exactly what
-                you&apos;re getting before anything starts.
-              </p>
-            </div>
-            <div>
-              <h2 className="font-display text-2xl font-bold tracking-tight">Who it&apos;s for</h2>
-              <p className="mt-4 leading-relaxed text-[var(--muted)]">
-                Teams that know the opportunity and need it built right — with
-                evaluation you can trust and a handoff that sticks. If your
-                team should build it themselves and just needs a senior pair of
-                eyes, say so; that&apos;s a shorter engagement, not this one.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="rule">
-          <div className="mx-auto max-w-5xl px-6 py-16 sm:py-20">
-            <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">What&apos;s explicitly not included</h2>
-            <ul className="mt-8 space-y-4">
-              {notIncluded.map((n) => (
-                <li key={n} className="flex gap-4 leading-relaxed text-[var(--muted)]">
-                  <span className="font-semibold text-[var(--ink)]">—</span>
-                  <span>{n}</span>
-                </li>
-              ))}
-            </ul>
-            <a
-              href="/contact"
-              className="mt-12 inline-block rounded-full bg-[var(--ink)] px-8 py-3.5 text-sm font-semibold text-[var(--paper)] transition-colors hover:bg-[var(--accent-deep)]"
-            >
-              Start a conversation →
-            </a>
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
+    <ServicePage
+      n="03"
+      title="Building custom solutions"
+      jsonLd={jsonLd}
+      lede={<>Working prototypes on your real data — embedding and search systems, forecasting models, production data pipelines with quality gates, agentic workflows with human approval gates. Built to hand off: documentation and training so your team owns it.</>}
+      deliverables={deliverables}
+      howItRuns={<>Weeks, not quarters. The shape is always the same: diagnose the decision, build a working slice on real data, evaluate it honestly, then hand it over with your team trained to run it. Engagements are scoped to a single working system with a fixed price agreed upfront — you&rsquo;ll know exactly what you&rsquo;re getting before anything starts.</>}
+      whoFor={<>Teams that know the opportunity and need it built right — with evaluation you can trust and a handoff that sticks. If your team should build it themselves and just needs a senior pair of eyes, say so; that&rsquo;s a shorter engagement, not this one.</>}
+      notIncluded={notIncluded}
+    />
   );
 }
