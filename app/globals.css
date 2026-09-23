@@ -2,69 +2,546 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------
+   Alamo St Advisors — design tokens
+   Limestone paper, iron-gall ink, one oxblood accent.
+   System stacks only: no webfonts, no tracking.
+   ------------------------------------------------------------------ */
+
 :root {
-  --paper: #faf7f1;
-  --paper-deep: #f2ecdf;
-  --ink: #221d15;
-  --muted: #6f6455;
-  --line: #e3d9c6;
-  --accent: #b25e38;
-  --accent-deep: #8c4527;
-  --dark: #1c1813;
-  --dark-paper: #f4eee1;
+  color-scheme: light dark;
+
+  /* palette — light (limestone by day) */
+  --paper: #f1ece2;
+  --paper-2: #e9e2d4;
+  --ink: #1e1a15;
+  --ink-2: #5a5144;
+  --line: #d5cab6;
+  --line-strong: #b3a68e;
+  --accent: #7b2d1e;
+  --accent-hover: #5e2014;
+  --on-accent: #f6f1e7;
+
+  /* the one inverted band */
+  --band: #1e1a15;
+  --band-ink: #ece5d7;
+  --band-ink-2: #a99f8d;
+  --band-line: #3a342b;
+  --band-accent: #d49178;
+
+  /* type */
+  --font-display: Charter, "Bitstream Charter", "Iowan Old Style", "Sitka Text",
+    Cambria, Georgia, serif;
+  --font-text: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+    Helvetica, Arial, "Liberation Sans", sans-serif;
+
+  --step--2: 0.6875rem; /* 11 — labels */
+  --step--1: 0.8125rem; /* 13 — small */
+  --step-0: 1.0625rem; /* 17 — body */
+  --step-1: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem); /* 18–20 — lead */
+  --step-2: clamp(1.375rem, 1.2rem + 0.6vw, 1.625rem); /* item titles */
+  --step-3: clamp(1.875rem, 1.45rem + 1.7vw, 2.75rem); /* section titles */
+  --step-4: clamp(2.5rem, 1.6rem + 3.9vw, 4.75rem); /* page titles */
+
+  --measure: 38rem;
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* limestone by night */
+    --paper: #14120f;
+    --paper-2: #1c1915;
+    --ink: #ece5d7;
+    --ink-2: #a99f8d;
+    --line: #2d2821;
+    --line-strong: #4a4237;
+    --accent: #d49178;
+    --accent-hover: #e6ab94;
+    --on-accent: #14120f;
+
+    --band: #1c1915;
+    --band-ink: #ece5d7;
+    --band-ink-2: #a99f8d;
+    --band-line: #342e26;
+    --band-accent: #d49178;
+  }
+}
+
+/* ------------------------------------------------------------------ base */
+
 html {
-  scroll-behavior: smooth;
+  scroll-padding-top: 5.5rem;
+  -webkit-text-size-adjust: 100%;
+  scrollbar-color: var(--line-strong) var(--paper);
 }
 
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-text);
+  font-size: var(--step-0);
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-}
-
-.font-display {
-  font-family: Georgia, "Iowan Old Style", "Times New Roman", Times, serif;
-  letter-spacing: -0.01em;
+  font-feature-settings: "kern", "liga";
+  overflow-x: clip;
 }
 
 ::selection {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
-/* thin elegant rules */
-.rule {
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--paper);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border: 3px solid var(--paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+/* ------------------------------------------------------------ typography */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.08;
+  text-wrap: balance;
+  font-feature-settings: "kern", "liga", "onum" 0;
+}
+
+.t-page {
+  font-size: var(--step-4);
+  letter-spacing: -0.022em;
+  line-height: 1.02;
+}
+.t-section {
+  font-size: var(--step-3);
+}
+.t-item {
+  font-size: var(--step-2);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.lead {
+  font-size: var(--step-1);
+  line-height: 1.6;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.body {
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+/* tracked small-caps label: the title-card voice */
+.label {
+  font-family: var(--font-text);
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.label-accent {
+  color: var(--accent);
+}
+
+.num {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+
+/* label flanked by rules — centered on the axis */
+.flanked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+.flanked::before,
+.flanked::after {
+  content: "";
+  height: 1px;
+  width: clamp(1.5rem, 5vw, 3rem);
+  background: currentColor;
+  opacity: 0.45;
+}
+
+/* long labels drop their rules on narrow screens and balance onto two lines */
+@media (max-width: 639px) {
+  .flanked-wide::before,
+  .flanked-wide::after {
+    display: none;
+  }
+  .flanked-wide {
+    text-wrap: balance;
+    max-width: 16rem;
+  }
+}
+
+/* --------------------------------------------------------------- layout */
+
+.frame {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: clamp(4.5rem, 3rem + 6vw, 8.5rem);
+}
+
+.hair-t {
   border-top: 1px solid var(--line);
 }
-
-/* subtle warm wash for the hero */
-.hero-grain {
-  background-image: radial-gradient(
-      ellipse 80% 60% at 50% -10%,
-      rgba(178, 94, 56, 0.08),
-      transparent
-    ),
-    radial-gradient(ellipse 60% 50% at 90% 110%, rgba(178, 94, 56, 0.05), transparent);
+.hair-b {
+  border-bottom: 1px solid var(--line);
 }
 
-/* card hover lift */
-.lift {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.lift:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 40px -22px rgba(34, 29, 21, 0.35);
+/* the plumb line that joins one section to the next */
+.axis {
+  display: block;
+  width: 1px;
+  height: clamp(2.5rem, 5vw, 4rem);
+  margin-inline: auto;
+  background: linear-gradient(var(--line-strong), transparent);
 }
 
-/* numbered step marker */
-.step-num {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 0.8rem;
-  letter-spacing: 0.18em;
+/* hairline grids: cells share single 1px rules, no doubled borders */
+.ruled {
+  display: grid;
+  gap: 1px;
+  background: var(--line);
+  border-block: 1px solid var(--line);
+}
+.ruled > * {
+  background: var(--paper);
+}
+
+/* ---------------------------------------------------------------- band */
+
+.band {
+  background: var(--band);
+  color: var(--band-ink);
+  --ink: var(--band-ink);
+  --ink-2: var(--band-ink-2);
+  --line: var(--band-line);
+  --line-strong: var(--band-ink-2);
+  --accent: var(--band-accent);
+  --accent-hover: var(--band-ink);
+  --on-accent: var(--band);
+  --paper: var(--band);
+  --paper-2: var(--band);
+}
+.band ::selection {
+  background: var(--band-accent);
+  color: var(--band);
+}
+
+/* ------------------------------------------------------------- controls */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0 1.75rem;
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  transition: background-color 0.5s var(--ease), color 0.5s var(--ease),
+    border-color 0.5s var(--ease);
+}
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+.btn-primary:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.btn-quiet {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+.btn-quiet:hover {
+  border-color: var(--ink);
+}
+.btn:active {
+  transform: translateY(1px);
+}
+
+.arrow {
+  display: inline-block;
+  transition: transform 0.6s var(--ease);
+}
+a:hover .arrow,
+.btn:hover .arrow {
+  transform: translateX(0.3em);
+}
+
+/* understated text link */
+.link {
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   color: var(--accent);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.link:hover {
+  color: var(--accent-hover);
+}
+
+.nav-link {
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  text-decoration: none;
+  position: relative;
+  padding-block: 0.5rem;
+  transition: color 0.4s var(--ease);
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.2rem;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform 0.6s var(--ease);
+}
+.nav-link:hover {
+  color: var(--ink);
+}
+.nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* skip link */
+.skip {
+  position: absolute;
+  left: 50%;
+  top: 0.75rem;
+  z-index: 100;
+  transform: translate(-50%, -200%);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.75rem 1.25rem;
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.skip:focus {
+  transform: translate(-50%, 0);
+}
+
+/* --------------------------------------------------------------- cells */
+
+/* a column in a colonnade: accent lintel grows from its centre on hover */
+.cell {
+  position: relative;
+  transition: background-color 0.6s var(--ease);
+}
+.cell::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform 0.8s var(--ease);
+}
+.cell:hover::before,
+.cell:focus-within::before {
+  transform: scaleX(1);
+}
+.cell:hover {
+  background: var(--paper-2);
+}
+
+/* ---------------------------------------------------------------- faq */
+
+.faq summary {
+  list-style: none;
+  cursor: pointer;
+}
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+.faq .plus {
+  position: relative;
+  width: 0.875rem;
+  height: 0.875rem;
+  flex: none;
+  transition: transform 0.6s var(--ease);
+}
+.faq .plus::before,
+.faq .plus::after {
+  content: "";
+  position: absolute;
+  inset: 50% 0 auto;
+  height: 1px;
+  background: var(--accent);
+}
+.faq .plus::after {
+  transform: rotate(90deg);
+}
+.faq details[open] .plus {
+  transform: rotate(45deg);
+}
+.faq summary:hover .q {
+  color: var(--accent);
+}
+.faq .q {
+  transition: color 0.4s var(--ease);
+}
+
+/* -------------------------------------------------------------- motion */
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* title sequence: the corridor draws itself, then the words arrive */
+  .corridor .arch {
+    stroke-dasharray: 1;
+    animation: draw 1.8s var(--ease) both;
+    animation-delay: calc(var(--i, 0) * 110ms);
+  }
+  .corridor .floor {
+    stroke-dasharray: 1;
+    animation: draw 2.2s var(--ease) both;
+  }
+  .corridor .door {
+    animation: fade 1.6s var(--ease) 0.7s both;
+  }
+  .seq {
+    animation: rise 1.2s var(--ease) both;
+    animation-delay: calc(var(--d, 0) * 1ms);
+  }
+
+  /* quiet reveal as sections enter the frame (no JS; progressive) */
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* --------------------------------------------------------------- print */
+
+@media print {
+  :root {
+    --paper: #fff;
+    --paper-2: #fff;
+    --ink: #000;
+    --ink-2: #333;
+    --line: #bbb;
+    --accent: #000;
+  }
+  header[role="banner"],
+  .no-print,
+  .skip {
+    display: none !important;
+  }
+  .band {
+    background: #fff;
+    color: #000;
+    --ink: #000;
+    --ink-2: #333;
+    --line: #bbb;
+    --accent: #000;
+    --paper: #fff;
+  }
+  .section {
+    padding-block: 2rem;
+  }
+  details > *:not(summary) {
+    display: block;
+  }
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+  }
 }
