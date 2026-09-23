@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 const DESCRIPTION =
@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   metadataBase: new URL("https://www.alamost.com"),
   applicationName: "Alamo St Advisors",
+  authors: [{ name: "JC Davis", url: "https://jcamd.com" }],
+  formatDetection: { telephone: false, address: false, email: false },
   openGraph: {
     siteName: "Alamo St Advisors",
     title: "Alamo St Advisors — Advisory for teams building with AI",
@@ -33,6 +35,14 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     images: ["/og.png"],
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f1ece2" },
+    { media: "(prefers-color-scheme: dark)", color: "#14120f" },
+  ],
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
