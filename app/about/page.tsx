@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Header from "@/app/components/header";
 import Footer from "@/app/components/footer";
+import { Arrow, Closing, PageHero, SectionHead } from "@/app/components/ui";
 
 export const metadata: Metadata = {
   title: "About",
+  alternates: { canonical: "/about" },
   description:
     "Alamo St Advisors is led by JC Davis, an independent advisor in Austin, Texas. The work is the credential: shipped AI systems, rigorous evaluation, and products people use.",
 };
@@ -55,73 +57,61 @@ export default function AboutPage() {
     <div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Header />
-      <main>
-        <section className="hero-grain">
-          <div className="mx-auto max-w-5xl px-6 pb-16 pt-16 sm:pt-20">
-            <p className="step-num mb-4">ABOUT</p>
-            <h1 className="font-display max-w-3xl text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
-              Built by someone who ships.
-            </h1>
-            <div className="mt-8 max-w-2xl space-y-5 text-lg leading-relaxed text-[var(--muted)]">
-              <p>
-                Alamo St Advisors is led by{" "}
-                <span className="font-semibold text-[var(--ink)]">JC Davis</span>,
-                an independent advisor in Austin, Texas who builds and ships AI
-                product systems — embedding-map games, forecasting models,
-                agentic systems, and data pipelines that run on real data at
-                full scale.
-              </p>
-              <p>
-                The work is the credential. Production machine-learning
-                systems, rigorous held-out evaluation, and products people
-                actually use — the same discipline advisory engagements get,
-                pointed at your hardest decisions.
-              </p>
-              <p>
-                Engagements are deliberately limited: a few teams at a time, and
-                you work directly with the principal throughout. No bench, no
-                handoffs, no juniors learning on your budget.
-              </p>
-            </div>
+      <main id="main">
+        <PageHero label="About the principal" title="Built by someone who ships.">
+          <div className="space-y-6 text-left">
+            <p className="display text-[length:var(--step-2)] leading-[1.45]">
+              Alamo St Advisors is led by JC Davis, an independent advisor in
+              Austin, Texas who builds and ships AI product systems —
+              embedding-map games, forecasting models, agentic systems, and data
+              pipelines that run on real data at full scale.
+            </p>
+            <p className="body">
+              The work is the credential. Production machine-learning
+              systems, rigorous held-out evaluation, and products people
+              actually use — the same discipline advisory engagements get,
+              pointed at your hardest decisions.
+            </p>
+            <p className="body">
+              Engagements are deliberately limited: a few teams at a time, and
+              you work directly with the principal throughout. No bench, no
+              handoffs, no juniors learning on your budget.
+            </p>
+          </div>
+        </PageHero>
+
+        <section className="section pt-12 sm:pt-16">
+          <div className="frame">
+            <SectionHead
+              label="Public work"
+              title="The work behind the advice"
+              lede="A sample of production systems built and run by the principal — public work you can inspect before you ever start a conversation."
+            />
+            <ul className="ruled reveal mt-16 sm:mt-20 md:grid-cols-2">
+              {creds.map((c) => (
+                <li key={c.title} className="cell flex flex-col px-1 py-10 sm:px-10 sm:py-12">
+                  <h3 className="display t-item">
+                    <a
+                      href={c.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="no-underline after:absolute after:inset-0 after:content-['']"
+                    >
+                      {c.title}
+                      <span className="sr-only"> (opens in a new tab)</span>
+                    </a>
+                  </h3>
+                  <p className="body mt-4 flex-1">{c.body}</p>
+                  <p className="link mt-8" aria-hidden="true">
+                    {c.label} <Arrow external />
+                  </p>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
-        <section className="rule">
-          <div className="mx-auto max-w-5xl px-6 py-16 sm:py-20">
-            <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-              The work behind the advice
-            </h2>
-            <p className="mt-4 max-w-2xl leading-relaxed text-[var(--muted)]">
-              A sample of production systems built and run by the principal —
-              public work you can inspect before you ever start a conversation.
-            </p>
-            <div className="mt-10 grid gap-6 sm:grid-cols-2">
-              {creds.map((c) => (
-                <div
-                  key={c.title}
-                  className="lift flex flex-col rounded-2xl border border-[var(--line)] bg-white/60 p-8"
-                >
-                  <h3 className="font-display text-xl font-bold">{c.title}</h3>
-                  <p className="mt-3 flex-1 leading-relaxed text-[var(--muted)]">{c.body}</p>
-                  <a
-                    href={c.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-5 text-sm font-semibold text-[var(--accent-deep)] hover:underline"
-                  >
-                    {c.label} →
-                  </a>
-                </div>
-              ))}
-            </div>
-            <a
-              href="/contact"
-              className="mt-12 inline-block rounded-full bg-[var(--ink)] px-8 py-3.5 text-sm font-semibold text-[var(--paper)] transition-colors hover:bg-[var(--accent-deep)]"
-            >
-              Start a conversation →
-            </a>
-          </div>
-        </section>
+        <Closing />
       </main>
       <Footer />
     </div>

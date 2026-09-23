@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Header from "@/app/components/header";
 import Footer from "@/app/components/footer";
+import { Closing, PageHero } from "@/app/components/ui";
 
 export const metadata: Metadata = {
   title: "Process",
+  alternates: { canonical: "/process" },
   description:
     "How Alamo St Advisors works: diagnose, prototype, hand off — short engagements on real data, with principles that keep the work honest.",
 };
@@ -33,97 +35,103 @@ const principles = [
   ["No theater", "If the answer is “you don't need AI for this,” that's the answer you'll get. The firm's only repeat business is the kind earned honestly."],
 ];
 
+function Prose({ label, title, children }: { label: string; title: string; children: React.ReactNode }) {
+  return (
+    <div className="frame">
+      <div className="reveal flex flex-col items-center text-center">
+        <p className="label label-accent flanked">{label}</p>
+        <h2 className="display t-section mt-6">{title}</h2>
+      </div>
+      <div className="reveal body mx-auto mt-10 max-w-[var(--measure)] space-y-6">{children}</div>
+    </div>
+  );
+}
+
 export default function ProcessPage() {
   return (
     <div>
       <Header />
-      <main>
-        <section className="hero-grain">
-          <div className="mx-auto max-w-5xl px-6 pb-16 pt-16 sm:pt-20">
-            <p className="step-num mb-4">PROCESS</p>
-            <h1 className="font-display max-w-3xl text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
-              Short engagements. Working software. Clean handoff.
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[var(--muted)]">
-              Every engagement follows the same shape: understand the decision,
-              build a working slice, prove what it does, and leave your team
-              holding it. Weeks, not quarters — fixed scope, agreed upfront.
+      <main id="main">
+        <PageHero label="Process" title="Short engagements. Working software. Clean handoff.">
+          <p className="lead">
+            Every engagement follows the same shape: understand the decision,
+            build a working slice, prove what it does, and leave your team
+            holding it. Weeks, not quarters — fixed scope, agreed upfront.
+          </p>
+        </PageHero>
+
+        <section className="section pt-12 sm:pt-16">
+          <Prose label="Before" title="Before first contact">
+            <p>
+              Nothing formal. Read the site, kick the tires on the public
+              work — the embedding-map game, the Atlas — and decide whether
+              this is the kind of rigor you want pointed at your problem. A
+              short note about your team, your data, and the decision
+              you&rsquo;re stuck on is the whole application.
             </p>
-          </div>
+            <p>
+              The first conversation is a conversation, not a pitch. If
+              there&rsquo;s no fit — wrong problem, wrong timing, wrong firm —
+              you&rsquo;ll hear that quickly and honestly, with a pointer to
+              what would actually help.
+            </p>
+          </Prose>
         </section>
 
-        <section className="rule">
-          <div className="mx-auto max-w-5xl px-6 py-16 sm:py-20">
-            <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Before first contact</h2>
-            <div className="mt-6 max-w-3xl space-y-5 leading-relaxed text-[var(--muted)]">
-              <p>
-                Nothing formal. Read the site, kick the tires on the public
-                work — the embedding-map game, the Atlas — and decide whether
-                this is the kind of rigor you want pointed at your problem. A
-                short note about your team, your data, and the decision
-                you&apos;re stuck on is the whole application.
-              </p>
-              <p>
-                The first conversation is a conversation, not a pitch. If
-                there&apos;s no fit — wrong problem, wrong timing, wrong firm —
-                you&apos;ll hear that quickly and honestly, with a pointer to
-                what would actually help.
-              </p>
+        <section className="band section">
+          <div className="frame">
+            <div className="reveal flex flex-col items-center text-center">
+              <p className="label label-accent flanked">During</p>
+              <h2 className="display t-section mt-6">The three phases</h2>
             </div>
-          </div>
-        </section>
-
-        <section className="bg-[var(--dark)] text-[var(--dark-paper)]">
-          <div className="mx-auto max-w-5xl px-6 py-16 sm:py-20">
-            <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">The three phases</h2>
-            <div className="mt-10 grid gap-10 sm:grid-cols-3">
+            <ol className="reveal relative mt-16 grid gap-14 sm:mt-20 md:grid-cols-3 md:gap-10">
+              <span
+                aria-hidden="true"
+                className="absolute left-[16.66%] right-[16.66%] top-[0.6875rem] hidden h-px bg-[var(--line)] md:block"
+              />
               {steps.map((s) => (
-                <div key={s.n}>
-                  <p className="step-num text-2xl">{s.n}</p>
-                  <h3 className="font-display mt-3 text-xl font-bold">{s.title}</h3>
-                  <p className="mt-3 leading-relaxed opacity-75">{s.body}</p>
-                </div>
+                <li key={s.n} className="relative flex flex-col items-center text-center">
+                  <span
+                    aria-hidden="true"
+                    className="block h-[1.375rem] w-[1.375rem] rounded-full border border-[var(--accent)] bg-[var(--band)] p-[5px]"
+                  >
+                    <span className="block h-full w-full rounded-full bg-[var(--accent)]" />
+                  </span>
+                  <p className="num mt-6 text-xl">{s.n}</p>
+                  <h3 className="display t-item mt-3">{s.title}</h3>
+                  <p className="body mt-4 max-w-[22rem]">{s.body}</p>
+                </li>
               ))}
-            </div>
-            <div className="mt-16 grid gap-6 border-t border-white/15 pt-12 sm:grid-cols-2">
+            </ol>
+            <ul className="ruled reveal mt-20 sm:mt-24 sm:grid-cols-2 lg:grid-cols-4">
               {principles.map(([t, b]) => (
-                <div key={t} className="flex gap-4">
-                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" />
-                  <div>
-                    <p className="font-semibold">{t}</p>
-                    <p className="mt-1 text-sm leading-relaxed opacity-70">{b}</p>
-                  </div>
-                </div>
+                <li key={t} className="px-1 py-8 sm:px-8">
+                  <p className="label !text-[var(--ink)]">{t}</p>
+                  <p className="body mt-3 text-[length:var(--step--1)] leading-relaxed">{b}</p>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </section>
 
-        <section className="rule">
-          <div className="mx-auto max-w-5xl px-6 py-16 sm:py-20">
-            <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">After handoff</h2>
-            <div className="mt-6 max-w-3xl space-y-5 leading-relaxed text-[var(--muted)]">
-              <p>
-                The engagement ends when your team can run, evaluate, and
-                extend the work without help — documentation, training, and
-                evaluation playbooks in hand. That&apos;s the actual
-                deliverable; the software is just the proof it works.
-              </p>
-              <p>
-                If you want a longer arrangement afterward — a second phase, a
-                periodic review, a standing evaluation loop — that&apos;s a new
-                conversation with its own fixed scope. What never happens by
-                default: a retainer that quietly becomes a dependency.
-              </p>
-            </div>
-            <a
-              href="/contact"
-              className="mt-12 inline-block rounded-full bg-[var(--ink)] px-8 py-3.5 text-sm font-semibold text-[var(--paper)] transition-colors hover:bg-[var(--accent-deep)]"
-            >
-              Start a conversation →
-            </a>
-          </div>
+        <section className="section">
+          <Prose label="After" title="After handoff">
+            <p>
+              The engagement ends when your team can run, evaluate, and
+              extend the work without help — documentation, training, and
+              evaluation playbooks in hand. That&rsquo;s the actual
+              deliverable; the software is just the proof it works.
+            </p>
+            <p>
+              If you want a longer arrangement afterward — a second phase, a
+              periodic review, a standing evaluation loop — that&rsquo;s a new
+              conversation with its own fixed scope. What never happens by
+              default: a retainer that quietly becomes a dependency.
+            </p>
+          </Prose>
         </section>
+
+        <Closing />
       </main>
       <Footer />
     </div>

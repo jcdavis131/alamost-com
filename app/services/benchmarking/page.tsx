@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Header from "@/app/components/header";
-import Footer from "@/app/components/footer";
+import ServicePage from "@/app/components/service-page";
 
 export const metadata: Metadata = {
   title: "Benchmarking workflows that matter",
+  alternates: { canonical: "/services/benchmarking" },
   description:
     "Evaluation harnesses built on your own data: champion vs. challenger, held-out metrics, human-in-the-loop checks — tied to business outcomes, not leaderboard scores.",
 };
@@ -39,89 +39,15 @@ export default function BenchmarkingPage() {
     description: metadata.description,
   };
   return (
-    <div>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <Header />
-      <main>
-        <section className="hero-grain">
-          <div className="mx-auto max-w-5xl px-6 pb-16 pt-16 sm:pt-20">
-            <p className="step-num mb-4"><a href="/#services" className="hover:underline">SERVICES</a> · 02</p>
-            <h1 className="font-display max-w-3xl text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
-              Benchmarking workflows that matter
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[var(--muted)]">
-              Evaluation harnesses built on your own data: champion vs.
-              challenger, held-out metrics, human-in-the-loop checks — tied to
-              business outcomes, not leaderboard scores. Know what a model or
-              an agent will do for your customers before it ever touches them.
-            </p>
-          </div>
-        </section>
-
-        <section className="rule">
-          <div className="mx-auto max-w-5xl px-6 py-16 sm:py-20">
-            <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">What you get</h2>
-            <div className="mt-10 space-y-8">
-              {deliverables.map(([t, b]) => (
-                <div key={t} className="flex gap-5">
-                  <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" />
-                  <div>
-                    <p className="font-semibold">{t}</p>
-                    <p className="mt-1 max-w-3xl leading-relaxed text-[var(--muted)]">{b}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="rule">
-          <div className="mx-auto grid max-w-5xl gap-10 px-6 py-16 sm:grid-cols-2 sm:py-20">
-            <div>
-              <h2 className="font-display text-2xl font-bold tracking-tight">How it runs</h2>
-              <p className="mt-4 leading-relaxed text-[var(--muted)]">
-                Three to six weeks. First the harness: your data turned into
-                scored test sets with the metrics that matter to the business.
-                Then the matchup: champion vs. challenger run cleanly, with
-                held-out data and the failure cases written up plainly. You get
-                a report a product lead can act on — ship it, fix it, or kill
-                it — and a playbook so your team can rerun the whole thing.
-              </p>
-            </div>
-            <div>
-              <h2 className="font-display text-2xl font-bold tracking-tight">Who it&apos;s for</h2>
-              <p className="mt-4 leading-relaxed text-[var(--muted)]">
-                Teams about to ship — or about to buy — an AI system and
-                needing an honest answer first. Model vendors and internal
-                champions bring demos; this engagement brings the part demos
-                skip: what it does on <em>your</em> customers&apos; data, with
-                the bad news included.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="rule">
-          <div className="mx-auto max-w-5xl px-6 py-16 sm:py-20">
-            <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">What&apos;s explicitly not included</h2>
-            <ul className="mt-8 space-y-4">
-              {notIncluded.map((n) => (
-                <li key={n} className="flex gap-4 leading-relaxed text-[var(--muted)]">
-                  <span className="font-semibold text-[var(--ink)]">—</span>
-                  <span>{n}</span>
-                </li>
-              ))}
-            </ul>
-            <a
-              href="/contact"
-              className="mt-12 inline-block rounded-full bg-[var(--ink)] px-8 py-3.5 text-sm font-semibold text-[var(--paper)] transition-colors hover:bg-[var(--accent-deep)]"
-            >
-              Start a conversation →
-            </a>
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
+    <ServicePage
+      n="02"
+      title="Benchmarking workflows that matter"
+      jsonLd={jsonLd}
+      lede={<>Evaluation harnesses built on your own data: champion vs. challenger, held-out metrics, human-in-the-loop checks — tied to business outcomes, not leaderboard scores. Know what a model or an agent will do for your customers before it ever touches them.</>}
+      deliverables={deliverables}
+      howItRuns={<>Three to six weeks. First the harness: your data turned into scored test sets with the metrics that matter to the business. Then the matchup: champion vs. challenger run cleanly, with held-out data and the failure cases written up plainly. You get a report a product lead can act on — ship it, fix it, or kill it — and a playbook so your team can rerun the whole thing.</>}
+      whoFor={<>Teams about to ship — or about to buy — an AI system and needing an honest answer first. Model vendors and internal champions bring demos; this engagement brings the part demos skip: what it does on <em>your</em> customers&rsquo; data, with the bad news included.</>}
+      notIncluded={notIncluded}
+    />
   );
 }
