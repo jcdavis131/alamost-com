@@ -12,6 +12,7 @@ export default function Header() {
           <a href="/#work" className="transition-colors hover:text-[var(--ink)]">Work</a>
           <a href="/about" className="transition-colors hover:text-[var(--ink)]">About</a>
           <a href="/process" className="transition-colors hover:text-[var(--ink)]">Process</a>
+          <a href="/playbook/agentic-operations" className="transition-colors hover:text-[var(--ink)]">Playbook</a>
           <a href="/#faq" className="transition-colors hover:text-[var(--ink)]">FAQ</a>
         </nav>
         <a
