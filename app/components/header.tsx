@@ -8,6 +8,7 @@ export const NAV_LEFT = [
 ];
 
 export const NAV_RIGHT = [
+  { href: "/playbook/agentic-operations", label: "Playbook" },
   { href: "/about", label: "About" },
   { href: "/#faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
