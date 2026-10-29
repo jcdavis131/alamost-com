@@ -12,7 +12,7 @@ are invented — everything on the page is real.
 
 ## Stack
 
-Next.js 14 (app router) + Tailwind. Zero runtime dependencies beyond
+Next.js 15 (app router) + Tailwind. Zero runtime dependencies beyond
 Next/React. System font stacks only — no webfonts, no tracking.
 
 ## Develop
