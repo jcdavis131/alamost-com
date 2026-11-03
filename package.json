@@ -1,10 +1,10 @@
 {
   "dependencies": {
-    "next": "15.5.28",
+    "next": "15.5.29",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
-  "description": "alamost.com \u2014 Alamo St Advisors: independent advisory for teams building with AI",
+  "description": "alamost.com — Alamo St Advisors: independent advisory for teams building with AI",
   "devDependencies": {
     "@types/node": "^20.12.12",
     "@types/react": "^19.3.0",
